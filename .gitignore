@@ -64,3 +64,4 @@ typings/
 
 # Secret
 bottender.config.js
+.sessions

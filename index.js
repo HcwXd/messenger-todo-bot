@@ -1,4 +1,4 @@
-const { MessengerBot } = require('bottender');
+const { MessengerBot, FileSessionStore } = require('bottender');
 const { createServer } = require('bottender/express');
 const config = require('./bottender.config').messenger;
 const { ADD_TODO, LIST_TODO, DELETE_TODO } = require('./constant');
@@ -6,6 +6,7 @@ const { ADD_TODO, LIST_TODO, DELETE_TODO } = require('./constant');
 const bot = new MessengerBot({
   accessToken: config.accessToken,
   appSecret: config.appSecret,
+  sessionStore: new FileSessionStore(),
 });
 
 bot.setInitialState({
