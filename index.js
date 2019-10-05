@@ -99,6 +99,6 @@ bot.onEvent(async (context) => {
 
 const server = createServer(bot, { verifyToken: config.verifyToken });
 
-server.listen(5000, () => {
-  console.log('server is running on 5000 port...');
+server.listen(config.port, () => {
+  console.log(`server is running on ${config.port} port`);
 });
