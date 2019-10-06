@@ -63,5 +63,4 @@ typings/
 .env
 
 # Secret
-bottender.config.js
 .sessions
