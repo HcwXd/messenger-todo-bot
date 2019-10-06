@@ -10,4 +10,5 @@ module.exports = {
     ADD_TODO: `input/add`,
     EDIT_TODO: `input/edit`,
   },
+  DAY_OF_WEEK: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
 };

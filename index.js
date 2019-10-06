@@ -2,7 +2,14 @@ const { MessengerBot, FileSessionStore } = require('bottender');
 const { createServer } = require('bottender/express');
 const config = require('./bottender.config').messenger;
 const { POSTBACK_TITLE, INPUT_TYPE } = require('./constant');
-const { dCopy, replaceArrayItemByIndex } = require('./utils');
+const {
+  dCopy,
+  replaceArrayItemByIndex,
+  getTimestampFromDueDate,
+  getTimestampFromReminder,
+  renderDueDate,
+  renderReminder,
+} = require('./utils');
 
 const bot = new MessengerBot({
   accessToken: config.accessToken,
@@ -18,8 +25,8 @@ bot.setInitialState({
 
 const constructTodoSubtitle = ({ reminder, dueDate, note }) => {
   let subtitle = '';
-  if (dueDate) subtitle += `Due ${dueDate}\n`;
-  if (reminder) subtitle += `Remind me at ${reminder}\n`;
+  if (dueDate) subtitle += `Due ${renderDueDate(dueDate)}\n`;
+  if (reminder) subtitle += `Remind me at ${renderReminder(reminder)}\n`;
   if (note) subtitle += `Note: ${note}`;
   return subtitle;
 };
@@ -65,7 +72,6 @@ bot.onEvent(async (context) => {
           ({ title }) => title === context.state.userInput.payload
         );
         const editTodo = dCopy(context.state.todos[targetIdx]);
-        console.log(editTodo);
         const editData = context.event.text;
         const editArray = editData.split('\n');
         editArray.forEach(async (element) => {
@@ -74,30 +80,37 @@ bot.onEvent(async (context) => {
             if (setData.length !== 3) {
               await context.sendText(`Wrong format: ${element}`);
             } else {
-              editTodo.reminder = `${element.split(' ')[1]} ${element.split(' ')[2]}`;
+              const timeStamp = getTimestampFromReminder(
+                `${element.split(' ')[1]} ${element.split(' ')[2]}`
+              );
+              if (!timeStamp) {
+                await context.sendText(`Wrong format: ${element}`);
+              } else {
+                editTodo.reminder = timeStamp;
+              }
             }
           } else if (element[0] === 'D') {
             let setData = element.split(' ');
             if (setData.length !== 2) {
               await context.sendText(`Wrong format: ${element}`);
             } else {
-              editTodo.dueDate = element.split(' ')[1];
+              const timeStamp = getTimestampFromDueDate(element.split(' ')[1]);
+              if (!timeStamp) {
+                await context.sendText(`Wrong format: ${element}`);
+              } else {
+                editTodo.dueDate = timeStamp;
+              }
             }
           } else if (element[0] === 'N') {
-            let setData = element.split(' ');
-            if (setData.length !== 2) {
-              await context.sendText(`Wrong format: ${element}`);
-            } else {
-              editTodo.note = element.split(' ')[1];
-            }
+            editTodo.note = element.slice(2);
           }
         });
+        await context.sendText(`Update ${context.state.userInput.payload}`);
         context.setState({
           todos: replaceArrayItemByIndex(context.state.todos, targetIdx, editTodo),
           isWaitingUserInput: false,
           userInput: null,
         });
-        await context.sendText(`Update ${context.state.userInput.payload}`);
         break;
       case INPUT_TYPE.ADD_TODO:
         const todoTitle = context.event.text;
@@ -118,7 +131,7 @@ bot.onEvent(async (context) => {
           isWaitingUserInput: true,
         });
         await context.sendText(
-          `Please enter the todo info in the following format:\nD YYYYMMDD\nR YYYYMMDD HH:MM\nN Some notes here\n\nFor example:\nD 20200201\nR 20200101 13:00\nN Remember to call Jack first\n\nIf you only want to edit certain fields, you can just enter those (don't have to be in the same order as the example)\n\nFor example:\nR 20200101 13:00\n\nFor more information, click Help in the menu!`
+          `Please enter the todo info in the following format:\nD YYYY/MM/DD\nR YYYY/MM/DD/ HH:MM\nN Some notes here\n\nFor example:\nD 2020/02/01\nR 2020/01/01 13:00\nN Remember to call Jack first\n\nIf you only want to edit certain fields, you can just enter those (don't have to be in the same order as the example)\n\nFor example:\nR 2020/01/01 13:00\n\nFor more information, click Help in the menu!`
         );
 
         break;
