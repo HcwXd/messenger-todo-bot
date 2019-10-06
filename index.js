@@ -16,23 +16,7 @@ bot.setInitialState({
 });
 
 const sendActionList = async (context) => {
-  await context.sendButtonTemplate('What do you want to do next?', [
-    {
-      type: 'postback',
-      title: 'Add Todo',
-      payload: ADD_TODO,
-    },
-    {
-      type: 'postback',
-      title: 'List Todo',
-      payload: LIST_TODO,
-    },
-    {
-      type: 'postback',
-      title: 'Delete Todo',
-      payload: DELETE_TODO,
-    },
-  ]);
+  await context.sendText(`Okay`);
 };
 
 const sendDeleteTodoList = async (context) => {
