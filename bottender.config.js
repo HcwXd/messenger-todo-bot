@@ -1,5 +1,5 @@
 require('dotenv').config();
-const { ADD_TODO, LIST_TODO, DELETE_TODO } = require('./constant');
+const { POSTBACK_TITLE } = require('./constant');
 
 module.exports = {
   messenger: {
@@ -25,18 +25,13 @@ module.exports = {
           call_to_actions: [
             {
               type: 'postback',
-              title: 'Add Todo',
-              payload: ADD_TODO,
+              title: POSTBACK_TITLE.ADD_TODO,
+              payload: POSTBACK_TITLE.ADD_TODO,
             },
             {
               type: 'postback',
-              title: 'List Todo',
-              payload: LIST_TODO,
-            },
-            {
-              type: 'postback',
-              title: 'Delete Todo',
-              payload: DELETE_TODO,
+              title: POSTBACK_TITLE.LIST_TODO,
+              payload: POSTBACK_TITLE.LIST_TODO,
             },
           ],
         },

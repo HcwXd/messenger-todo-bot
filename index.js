@@ -1,7 +1,7 @@
 const { MessengerBot, FileSessionStore } = require('bottender');
 const { createServer } = require('bottender/express');
 const config = require('./bottender.config').messenger;
-const { ADD_TODO, LIST_TODO, DELETE_TODO } = require('./constant');
+const { POSTBACK_TITLE, INPUT_TYPE } = require('./constant');
 
 const bot = new MessengerBot({
   accessToken: config.accessToken,
@@ -11,74 +11,86 @@ const bot = new MessengerBot({
 
 bot.setInitialState({
   todos: [],
-  isAsking: false,
-  actionType: null,
+  isWaitingUserInput: false,
+  userInput: null,
 });
 
-const sendActionList = async (context) => {
-  await context.sendText(`Okay`);
+const listTodos = async (context) => {
+  await context.sendGenericTemplate(
+    context.state.todos.map(({ title, reminder }) => {
+      return {
+        title: title,
+        subtitle: '',
+        buttons: [
+          {
+            type: 'postback',
+            title: POSTBACK_TITLE.EDIT_TODO,
+            payload: title,
+          },
+          {
+            type: 'postback',
+            title: POSTBACK_TITLE.DELETE_TODO,
+            payload: title,
+          },
+        ],
+      };
+    }),
+    { image_aspect_ratio: 'square' }
+  );
 };
 
-const sendDeleteTodoList = async (context) => {
-  await context.sendButtonTemplate(
-    'Please choose one to delete',
-    context.state.todos.map((todo) => {
-      return {
-        type: 'postback',
-        title: todo,
-        payload: `delete/${todo}`,
-      };
-    })
-  );
+const deleteTodo = async (context, targetTodo) => {
+  context.setState({
+    todos: context.state.todos.filter(({ title }) => title !== targetTodo),
+  });
+  await context.sendText(`Delete todo ${targetTodo}!`);
 };
 
 bot.onEvent(async (context) => {
   const user = await context.getUserProfile();
   console.log(user);
-  if (context.state.isAsking) {
-    if (context.state.actionType === DELETE_TODO && context.event.isPostback) {
-      context.setState({
-        todos: context.state.todos.filter((todo) => todo !== context.event.postback.title),
-        actionType: null,
-        isAsking: false,
-      });
-      await context.sendText(`Delete Todo ${context.event.postback.title}`);
-    } else if (context.state.actionType === ADD_TODO) {
-      context.setState({
-        todos: context.state.todos.concat(context.event.text),
-        actionType: null,
-        isAsking: false,
-      });
-      await context.sendText(`Add Todo ${context.event.text}`);
-    } else {
-      context.setState({
-        actionType: null,
-        isAsking: false,
-      });
+  if (context.state.isWaitingUserInput && context.event.isText) {
+    switch (context.state.userInput.type) {
+      case INPUT_TYPE.EDIT_TODO:
+        break;
+      case INPUT_TYPE.ADD_TODO:
+        const todoTitle = context.event.text;
+        context.setState({
+          todos: context.state.todos.concat({ title: todoTitle }),
+          isWaitingUserInput: false,
+          userInput: null,
+        });
+        await context.sendText(`Add todo: ${todoTitle}`);
+        break;
     }
-    await sendActionList(context);
+  } else if (context.event.isPostback) {
+    switch (context.event.postback.title) {
+      case POSTBACK_TITLE.EDIT_TODO:
+        context.setState({
+          userInput: { type: INPUT_TYPE.EDIT_TODO, payload: context.event.postback.payload },
+          isWaitingUserInput: true,
+        });
+        break;
+      case POSTBACK_TITLE.ADD_TODO:
+        context.setState({
+          userInput: { type: INPUT_TYPE.ADD_TODO },
+          isWaitingUserInput: true,
+        });
+        await context.sendText(`Enter a title for this todo:`);
+        break;
+      case POSTBACK_TITLE.DELETE_TODO:
+        const targetTodo = context.event.postback.payload;
+        await deleteTodo(context, targetTodo);
+        break;
+      case POSTBACK_TITLE.LIST_TODO:
+        await listTodos(context);
+        break;
+      default:
+        await context.sendText(`Hello :)`);
+        break;
+    }
   } else {
-    if (context.event.isPostback) {
-      switch (context.event.postback.payload) {
-        case ADD_TODO:
-          context.setState({ actionType: ADD_TODO, isAsking: true });
-          await context.sendText(`Please enter your todo`);
-          break;
-        case LIST_TODO:
-          const todoList = context.state.todos.map((todo) => `- ${todo}`).join('\n');
-          await context.sendText(`Your Todo: \n${todoList}`);
-          await sendActionList(context);
-          break;
-        case DELETE_TODO:
-          context.setState({ actionType: DELETE_TODO, isAsking: true });
-          await sendDeleteTodoList(context);
-          break;
-        default:
-          break;
-      }
-    } else {
-      await sendActionList(context);
-    }
+    await context.sendText(`Hello :)`);
   }
 });
 
