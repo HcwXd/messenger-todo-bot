@@ -33,6 +33,11 @@ module.exports = {
               title: POSTBACK_TITLE.LIST_TODO,
               payload: POSTBACK_TITLE.LIST_TODO,
             },
+            {
+              type: 'postback',
+              title: POSTBACK_TITLE.SETTING,
+              payload: POSTBACK_TITLE.SETTING,
+            },
           ],
         },
       ],
