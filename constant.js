@@ -8,8 +8,11 @@ module.exports = {
     SET_DAILY_REMINDER: `Set Reminder`,
   },
   INPUT_TYPE: {
-    ADD_TODO: `input/add`,
-    EDIT_TODO: `input/edit`,
+    ADD_TODO: `input/addTodo`,
+    EDIT_TODO: `input/editTodo`,
+    EDIT_TODO_NOTES: `input/editTodo/notes`,
+    EDIT_TODO_DUE_DATE: `input/editTodo/dueDate`,
+    EDIT_TODO_REMINDER: `input/editTodo/reminder`,
     SET_DAILY_REMINDER: `input/setDailyReminder`,
   },
   DAY_OF_WEEK: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],

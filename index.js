@@ -25,6 +25,12 @@ bot.setInitialState({
   prefs: { dailyReminder: null },
 });
 
+const sendWrongFormat = async (context, value, type) => {
+  // TODO: Send different message according to different types
+  console.log(`sendWrongFormat ${type}:${value}`);
+  await context.sendText(`Wrong format: ${value}`);
+};
+
 const constructTodoSubtitle = ({ reminder, dueDate, note }) => {
   let subtitle = '';
   if (dueDate) subtitle += `Due ${renderDueDate(dueDate)}\n`;
@@ -74,13 +80,13 @@ const updateTargetTodo = async (context, targetIdx) => {
       // Set Reminder
       let setData = editString.split(' ');
       if (setData.length !== 3) {
-        await context.sendText(`Wrong format: ${editString}`);
+        await sendWrongFormat(context, editString, INPUT_TYPE.EDIT_TODO_REMINDER);
       } else {
         const timeStamp = getTimestampFromReminder(
           `${editString.split(' ')[1]} ${editString.split(' ')[2]}`
         );
         if (!timeStamp) {
-          await context.sendText(`Wrong format: ${editString}`);
+          await sendWrongFormat(context, editString, INPUT_TYPE.EDIT_TODO_REMINDER);
         } else {
           updatedTodo.reminder = timeStamp;
         }
@@ -89,11 +95,11 @@ const updateTargetTodo = async (context, targetIdx) => {
       // Set DueDate
       let setData = editString.split(' ');
       if (setData.length !== 2) {
-        await context.sendText(`Wrong format: ${editString}`);
+        await sendWrongFormat(context, editString, INPUT_TYPE.EDIT_TODO_DUE_DATE);
       } else {
         const timeStamp = getTimestampFromDueDate(editString.split(' ')[1]);
         if (!timeStamp) {
-          await context.sendText(`Wrong format: ${editString}`);
+          await sendWrongFormat(context, editString, INPUT_TYPE.EDIT_TODO_DUE_DATE);
         } else {
           updatedTodo.dueDate = timeStamp;
         }
@@ -166,7 +172,7 @@ bot.onEvent(async (context) => {
             isWaitingUserInput: false,
             userInput: null,
           });
-          await context.sendText(`Wrong format: ${dailyReminder}`);
+          await sendWrongFormat(context, dailyReminder, INPUT_TYPE.SET_DAILY_REMINDER);
         }
         break;
     }
