@@ -15,5 +15,8 @@ module.exports = {
     EDIT_TODO_REMINDER: `input/editTodo/reminder`,
     SET_DAILY_REMINDER: `input/setDailyReminder`,
   },
+  SHORT_CUT: {
+    ADD_TODO: '/a ',
+  },
   DAY_OF_WEEK: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
 };

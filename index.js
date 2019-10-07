@@ -1,7 +1,7 @@
 const { MessengerBot, FileSessionStore } = require('bottender');
 const { createServer } = require('bottender/express');
 const config = require('./bottender.config').messenger;
-const { POSTBACK_TITLE, INPUT_TYPE } = require('./constant');
+const { POSTBACK_TITLE, INPUT_TYPE, SHORT_CUT } = require('./constant');
 const {
   dCopy,
   replaceArrayItemByIndex,
@@ -155,7 +155,9 @@ bot.onEvent(async (context) => {
           isWaitingUserInput: false,
           userInput: null,
         });
-        await context.sendText(`Add todo: ${todoTitle}`);
+        await context.sendText(
+          `Add todo: ${todoTitle}.\n\nTo add a todo faster, you can simply enter "/a something todo" without clicking the Add todo button.\nFor example:\n/a ${todoTitle}`
+        );
         break;
       case INPUT_TYPE.SET_DAILY_REMINDER:
         const dailyReminder = context.event.text;
@@ -219,6 +221,17 @@ bot.onEvent(async (context) => {
         await context.sendText(`Hello Something went wrong :(`);
         break;
     }
+  } else if (context.event.isText) {
+    if (context.event.text.slice(0, 3) === SHORT_CUT.ADD_TODO) {
+      const todoTitle = context.event.text.slice(3);
+      context.setState({
+        todos: context.state.todos.concat({ title: todoTitle }),
+        isWaitingUserInput: false,
+        userInput: null,
+      });
+      await context.sendText(`Add todo: ${todoTitle}`);
+    }
+    await context.sendText(`Hello :)`);
   } else {
     await context.sendText(`Hello :)`);
   }
