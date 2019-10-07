@@ -1,5 +1,9 @@
 const { DAY_OF_WEEK } = require('./constant');
 
+const paddingLeft = (value) => {
+  return `${value < 10 ? '0' : ''}${value}`;
+};
+
 module.exports = {
   dCopy: (obj) => {
     if (obj === null) return null;
@@ -38,22 +42,23 @@ module.exports = {
 
     return new Date(year, month - 1, day, hour, minute);
   },
+
   renderDueDate: (dueDate) => {
     const year = new Date(dueDate).getFullYear();
-    const month = new Date(dueDate).getMonth() + 1;
-    const date = new Date(dueDate).getDate();
-    const day = DAY_OF_WEEK[new Date(dueDate).getDay()];
+    const month = paddingLeft(new Date(dueDate).getMonth() + 1);
+    const date = paddingLeft(new Date(dueDate).getDate());
+    const day = paddingLeft(DAY_OF_WEEK[new Date(dueDate).getDay()]);
     return year === new Date().getFullYear()
       ? `${month}/${date} (${day})`
       : `${year}/${month}/${date} (${day})`;
   },
   renderReminder: (reminder) => {
     const year = new Date(reminder).getFullYear();
-    const month = new Date(reminder).getMonth() + 1;
-    const date = new Date(reminder).getDate();
+    const month = paddingLeft(new Date(reminder).getMonth() + 1);
+    const date = paddingLeft(new Date(reminder).getDate());
     const day = DAY_OF_WEEK[new Date(reminder).getDay()];
-    const hour = new Date(reminder).getHours();
-    const minute = new Date(reminder).getMinutes();
+    const hour = paddingLeft(new Date(reminder).getHours());
+    const minute = paddingLeft(new Date(reminder).getMinutes());
 
     return year === new Date().getFullYear()
       ? `${month}/${date} (${day}) ${hour}:${minute}`
