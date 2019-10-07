@@ -156,8 +156,8 @@ bot.onEvent(async (context) => {
       case POSTBACK_TITLE.LIST_TODO:
         await listTodos(context);
         break;
-      case POSTBACK_TITLE.LIST_TODO:
-        await context.sendText(`Hello Setting is not implemented yet :(`);
+      case POSTBACK_TITLE.SETTINGS:
+        await context.sendText(`Hello Settings is not implemented yet :(`);
         break;
       default:
         await context.sendText(`Hello Something went wrong :(`);

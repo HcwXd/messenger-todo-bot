@@ -35,8 +35,8 @@ module.exports = {
             },
             {
               type: 'postback',
-              title: POSTBACK_TITLE.SETTING,
-              payload: POSTBACK_TITLE.SETTING,
+              title: POSTBACK_TITLE.SETTINGS,
+              payload: POSTBACK_TITLE.SETTINGS,
             },
           ],
         },

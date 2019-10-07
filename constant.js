@@ -4,7 +4,7 @@ module.exports = {
     LIST_TODO: `List Todos`,
     DELETE_TODO: `Delete`,
     EDIT_TODO: `Edit`,
-    SETTING: 'Setting',
+    SETTINGS: 'Settings',
   },
   INPUT_TYPE: {
     ADD_TODO: `input/add`,
