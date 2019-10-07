@@ -62,50 +62,57 @@ const deleteTodo = async (context, targetTodo) => {
   await context.sendText(`Delete todo ${targetTodo}!`);
 };
 
+const updateTargetTodo = async (context, targetIdx) => {
+  const updatedTodo = dCopy(context.state.todos[targetIdx]);
+  const editRawData = context.event.text;
+  const editRawArray = editRawData.split('\n');
+
+  editRawArray.forEach(async (editString) => {
+    if (editString[0] === 'R') {
+      // Set Reminder
+      let setData = editString.split(' ');
+      if (setData.length !== 3) {
+        await context.sendText(`Wrong format: ${editString}`);
+      } else {
+        const timeStamp = getTimestampFromReminder(
+          `${editString.split(' ')[1]} ${editString.split(' ')[2]}`
+        );
+        if (!timeStamp) {
+          await context.sendText(`Wrong format: ${editString}`);
+        } else {
+          updatedTodo.reminder = timeStamp;
+        }
+      }
+    } else if (editString[0] === 'D') {
+      // Set DueDate
+      let setData = editString.split(' ');
+      if (setData.length !== 2) {
+        await context.sendText(`Wrong format: ${editString}`);
+      } else {
+        const timeStamp = getTimestampFromDueDate(editString.split(' ')[1]);
+        if (!timeStamp) {
+          await context.sendText(`Wrong format: ${editString}`);
+        } else {
+          updatedTodo.dueDate = timeStamp;
+        }
+      }
+    } else if (editString[0] === 'N') {
+      // Set Note
+      updatedTodo.note = editString.slice(2);
+    }
+  });
+  return updatedTodo;
+};
+
 bot.onEvent(async (context) => {
-  const user = await context.getUserProfile();
-  console.log(user);
   if (context.state.isWaitingUserInput && context.event.isText) {
     switch (context.state.userInput.type) {
       case INPUT_TYPE.EDIT_TODO:
-        const targetIdx = context.state.todos.findIndex(
-          ({ title }) => title === context.state.userInput.payload
-        );
-        const editTodo = dCopy(context.state.todos[targetIdx]);
-        const editData = context.event.text;
-        const editArray = editData.split('\n');
-        editArray.forEach(async (element) => {
-          if (element[0] === 'R') {
-            let setData = element.split(' ');
-            if (setData.length !== 3) {
-              await context.sendText(`Wrong format: ${element}`);
-            } else {
-              const timeStamp = getTimestampFromReminder(
-                `${element.split(' ')[1]} ${element.split(' ')[2]}`
-              );
-              if (!timeStamp) {
-                await context.sendText(`Wrong format: ${element}`);
-              } else {
-                editTodo.reminder = timeStamp;
-              }
-            }
-          } else if (element[0] === 'D') {
-            let setData = element.split(' ');
-            if (setData.length !== 2) {
-              await context.sendText(`Wrong format: ${element}`);
-            } else {
-              const timeStamp = getTimestampFromDueDate(element.split(' ')[1]);
-              if (!timeStamp) {
-                await context.sendText(`Wrong format: ${element}`);
-              } else {
-                editTodo.dueDate = timeStamp;
-              }
-            }
-          } else if (element[0] === 'N') {
-            editTodo.note = element.slice(2);
-          }
-        });
-        await context.sendText(`Update ${context.state.userInput.payload}`);
+        const targetTodoTitle = context.state.userInput.payload;
+        const targetIdx = context.state.todos.findIndex(({ title }) => title === targetTodoTitle);
+        const editTodo = await updateTargetTodo(context, targetIdx);
+
+        await context.sendText(`Update ${targetTodoTitle}`);
         context.setState({
           todos: replaceArrayItemByIndex(context.state.todos, targetIdx, editTodo),
           isWaitingUserInput: false,
