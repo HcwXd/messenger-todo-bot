@@ -40,6 +40,10 @@ const constructTodoSubtitle = ({ reminder, dueDate, note }) => {
 };
 
 const listTodos = async (context) => {
+  if (context.state.todos.length === 0) {
+    await context.sendText(`There's no todo in your list :-p`);
+    return;
+  }
   await context.sendGenericTemplate(
     context.state.todos.map(({ title, reminder, dueDate, note }) => {
       return {
@@ -218,7 +222,7 @@ bot.onEvent(async (context) => {
         });
         break;
       default:
-        await context.sendText(`Hello Something went wrong :(`);
+        await context.sendText(`Hello :)`);
         break;
     }
   } else if (context.event.isText) {
