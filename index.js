@@ -9,6 +9,7 @@ const {
   getTimestampFromReminder,
   renderDueDate,
   renderReminder,
+  isCorrectTimeFormat,
 } = require('./utils');
 
 const bot = new MessengerBot({
@@ -21,6 +22,7 @@ bot.setInitialState({
   todos: [],
   isWaitingUserInput: false,
   userInput: null,
+  prefs: { dailyReminder: null },
 });
 
 const constructTodoSubtitle = ({ reminder, dueDate, note }) => {
@@ -104,6 +106,27 @@ const updateTargetTodo = async (context, targetIdx) => {
   return updatedTodo;
 };
 
+const listSettings = async (context) => {
+  await context.sendGenericTemplate(
+    [
+      {
+        title: 'Daily Reminder',
+        subtitle: context.state.prefs.dailyReminder
+          ? `Your daily reminder now set at ${context.state.prefs.dailyReminder}.`
+          : `You don't have daily reminder yet.`,
+        buttons: [
+          {
+            type: 'postback',
+            title: POSTBACK_TITLE.SET_DAILY_REMINDER,
+            payload: POSTBACK_TITLE.SET_DAILY_REMINDER,
+          },
+        ],
+      },
+    ],
+    { image_aspect_ratio: 'square' }
+  );
+};
+
 bot.onEvent(async (context) => {
   if (context.state.isWaitingUserInput && context.event.isText) {
     switch (context.state.userInput.type) {
@@ -128,6 +151,24 @@ bot.onEvent(async (context) => {
         });
         await context.sendText(`Add todo: ${todoTitle}`);
         break;
+      case INPUT_TYPE.SET_DAILY_REMINDER:
+        const dailyReminder = context.event.text;
+        if (isCorrectTimeFormat(dailyReminder)) {
+          context.setState({
+            prefs: { ...context.state.prefs, dailyReminder },
+            isWaitingUserInput: false,
+            userInput: null,
+          });
+          await context.sendText(`Set daily reminder: ${dailyReminder}`);
+          await context.sendText(`Reminder: This feature haven't been implemented yet :(`);
+        } else {
+          context.setState({
+            isWaitingUserInput: false,
+            userInput: null,
+          });
+          await context.sendText(`Wrong format: ${dailyReminder}`);
+        }
+        break;
     }
   } else if (context.event.isPostback) {
     switch (context.event.postback.title) {
@@ -138,7 +179,7 @@ bot.onEvent(async (context) => {
           isWaitingUserInput: true,
         });
         await context.sendText(
-          `Please enter the todo info in the following format:\nD YYYY/MM/DD\nR YYYY/MM/DD/ HH:MM\nN Some notes here\n\nFor example:\nD 2020/02/01\nR 2020/01/01 13:00\nN Remember to call Jack first\n\nIf you only want to edit certain fields, you can just enter those (don't have to be in the same order as the example)\n\nFor example:\nR 2020/01/01 13:00\n\nFor more information, click Help in the menu!`
+          `Enter the todo info in the following format:\nD YYYY/MM/DD\nR YYYY/MM/DD/ HH:mm\nN Some notes here\n\nFor example:\nD 2020/02/01\nR 2020/01/01 13:00\nN Remember to call Jack first\n\nIf you only want to edit certain fields, you can just enter those (don't have to be in the same order as the example)\n\nFor example:\nR 2020/01/01 13:00\n\nFor more information, click Help in the menu!`
         );
 
         break;
@@ -157,7 +198,16 @@ bot.onEvent(async (context) => {
         await listTodos(context);
         break;
       case POSTBACK_TITLE.SETTINGS:
-        await context.sendText(`Hello Settings is not implemented yet :(`);
+        await listSettings(context);
+        break;
+      case POSTBACK_TITLE.SET_DAILY_REMINDER:
+        await context.sendText(
+          `Enter a time in the following format: HH:mm\nFor example:\n13:00\nThis will set a daily reminder that will send a message at certain time everyday to remind you all the todos you have.`
+        );
+        context.setState({
+          userInput: { type: INPUT_TYPE.SET_DAILY_REMINDER },
+          isWaitingUserInput: true,
+        });
         break;
       default:
         await context.sendText(`Hello Something went wrong :(`);

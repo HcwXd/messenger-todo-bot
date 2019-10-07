@@ -59,4 +59,12 @@ module.exports = {
       ? `${month}/${date} (${day}) ${hour}:${minute}`
       : `${year}/${month}/${date} (${day}) ${hour}:${minute}`;
   },
+  isCorrectTimeFormat: (timeString) => {
+    return (
+      timeString.length === 5 &&
+      timeString[2] === ':' &&
+      !isNaN(timeString.split(':')[0]) &&
+      !isNaN(timeString.split(':')[1])
+    );
+  },
 };
