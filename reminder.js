@@ -2,6 +2,7 @@ require('dotenv').config();
 const fs = require('fs');
 const ls = require('ls');
 const axios = require('axios');
+const { renderDueDate } = require('./utils');
 
 const sendUrl = `https://graph.facebook.com/v4.0/me/messages?access_token=${process.env.MESSENGER_ACCESS_TOKEN}`;
 const checkReminderInterval = 6000;
@@ -17,7 +18,14 @@ const sendReminder = async ({ id, message }) => {
 };
 
 const constuctDailyReminderMessage = (todos) => {
-  const text = `#Daily Reminder\nYour Todos:\n${todos.map(({ title }) => `- ${title}`).join('\n')}`;
+  const text = `# Daily Reminder\nYour Todos:\n${todos
+    .map(({ title }) => `- ${title}`)
+    .join('\n')}`;
+  return { text };
+};
+
+const constuctTodoReminderMessage = ({ title, dueDate }) => {
+  const text = `# Reminder\n${title}\n- Due ${renderDueDate(dueDate)}`;
   return { text };
 };
 
@@ -31,9 +39,22 @@ const findDailyReminder = async (id, { todos, prefs }) => {
   }
 };
 
+const findTodoReminder = async (id, { todos }) => {
+  todos.forEach(async ({ title, reminder, dueDate }) => {
+    if (
+      reminder &&
+      new Date(reminder).toISOString().slice(0, 16) === new Date().toISOString().slice(0, 16)
+    ) {
+      const message = constuctTodoReminderMessage({ title, dueDate });
+      await sendReminder({ id, message });
+    }
+  });
+};
+
 const findReminder = async ({ user, _state: state }) => {
   const { id } = user;
   await findDailyReminder(id, state);
+  await findTodoReminder(id, state);
 };
 
 const checkReminder = async () => {
