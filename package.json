@@ -7,8 +7,10 @@
     "start": "node index.js"
   },
   "dependencies": {
+    "axios": "^0.19.0",
     "bottender": "0.15.17",
-    "dotenv": "^8.1.0"
+    "dotenv": "^8.1.0",
+    "ls": "^0.2.1"
   },
   "devDependencies": {
     "nodemon": "^1.19.3"
