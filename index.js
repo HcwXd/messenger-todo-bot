@@ -172,7 +172,6 @@ bot.onEvent(async (context) => {
             userInput: null,
           });
           await context.sendText(`Set daily reminder: ${dailyReminder}`);
-          await context.sendText(`Reminder: This feature haven't been implemented yet :(`);
         } else {
           context.setState({
             isWaitingUserInput: false,
@@ -234,8 +233,9 @@ bot.onEvent(async (context) => {
         userInput: null,
       });
       await context.sendText(`Add todo: ${todoTitle}`);
+    } else {
+      await context.sendText(`Hello :)`);
     }
-    await context.sendText(`Hello :)`);
   } else {
     await context.sendText(`Hello :)`);
   }
