@@ -4,6 +4,7 @@
   "private": true,
   "scripts": {
     "dev": "nodemon index.js",
+    "reminder": "nodemon reminder.js",
     "start": "node index.js"
   },
   "dependencies": {
