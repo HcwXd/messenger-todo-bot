@@ -7,3 +7,6 @@ Todo
 - [ ] Help section
 - [ ] Introduction section
 - [ ] Let user adjust the order of todos
+- [ ] More time validation
+- [ ] Use quick reply for adding/listing todo to improve UX
+- [ ] Use text list with quick reply instead of gallery for listing todo
