@@ -6,3 +6,4 @@ Todo
 - [ ] Set smart reminder according to due date
 - [ ] Help section
 - [ ] Introduction section
+- [ ] Let user adjust the order of todos
