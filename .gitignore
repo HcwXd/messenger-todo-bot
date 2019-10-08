@@ -64,3 +64,4 @@ typings/
 
 # Secret
 .sessions
+screenlog.*

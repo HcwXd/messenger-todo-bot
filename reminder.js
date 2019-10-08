@@ -5,7 +5,7 @@ const axios = require('axios');
 const { renderDueDate } = require('./utils');
 
 const sendUrl = `https://graph.facebook.com/v4.0/me/messages?access_token=${process.env.MESSENGER_ACCESS_TOKEN}`;
-const checkReminderInterval = 6000;
+const checkReminderInterval = 60000;
 
 const sendReminder = async ({ id, message }) => {
   await axios.post(sendUrl, {
