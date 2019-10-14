@@ -1,4 +1,8 @@
-require('dotenv').config();
+if (process.env.NODE_ENV === 'dev') {
+  require('dotenv').config({ path: `${process.cwd()}/.env.dev` });
+} else {
+  require('dotenv').config();
+}
 const { POSTBACK_TITLE } = require('./constant');
 
 module.exports = {

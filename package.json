@@ -3,7 +3,8 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "nodemon index.js",
+    "dev": "NODE_ENV=dev nodemon index.js",
+    "prod": "nodemon index.js",
     "reminder": "nodemon reminder.js",
     "start": "node index.js"
   },
