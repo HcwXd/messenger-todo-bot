@@ -111,7 +111,12 @@ const updateTargetTodo = async (context, targetIdx) => {
 
   editRawArray.forEach(async (editString) => {
     if (editString[0] === 'T') {
-      updatedTodo.title = editString.slice(2);
+      const todoTitle = editString.slice(2);
+      if (context.state.todos.findIndex(({ title }) => title === todoTitle) !== -1) {
+        await context.sendText(`Todo ${todoTitle} already exists`);
+      } else {
+        updatedTodo.title = todoTitle;
+      }
     } else if (editString[0] === 'R') {
       // Set Reminder
       let setData = editString.split(' ');
@@ -233,14 +238,22 @@ bot.onEvent(async (context) => {
         break;
       case INPUT_TYPE.ADD_TODO:
         const todoTitle = context.event.text;
-        context.setState({
-          todos: context.state.todos.concat({ title: todoTitle }),
-          isWaitingUserInput: false,
-          userInput: null,
-        });
-        await context.sendText(
-          `Add todo: ${todoTitle}.\n\nTo add a todo faster, you can simply enter "/a something todo" without clicking the Add todo button.\nFor example:\n/a ${todoTitle}`
-        );
+        if (context.state.todos.findIndex(({ title }) => title === todoTitle) !== -1) {
+          context.setState({
+            isWaitingUserInput: false,
+            userInput: null,
+          });
+          await context.sendText(`Todo ${todoTitle} already exists`);
+        } else {
+          context.setState({
+            todos: context.state.todos.concat({ title: todoTitle }),
+            isWaitingUserInput: false,
+            userInput: null,
+          });
+          await context.sendText(
+            `Add todo: ${todoTitle}.\n\nTo add a todo faster, you can simply enter "/a something todo" without clicking the Add todo button.\nFor example:\n/a ${todoTitle}`
+          );
+        }
         break;
       case INPUT_TYPE.SET_DAILY_REMINDER:
         const dailyReminder = context.event.text;
@@ -303,12 +316,20 @@ bot.onEvent(async (context) => {
   } else if (context.event.isText) {
     if (isShortCutOf(SHORT_CUT.ADD_TODO, context.event.text)) {
       const todoTitle = context.event.text.slice(3);
-      context.setState({
-        todos: context.state.todos.concat({ title: todoTitle }),
-        isWaitingUserInput: false,
-        userInput: null,
-      });
-      await context.sendText(`Add todo: ${todoTitle}`);
+      if (context.state.todos.findIndex(({ title }) => title === todoTitle) !== -1) {
+        context.setState({
+          isWaitingUserInput: false,
+          userInput: null,
+        });
+        await context.sendText(`Todo ${todoTitle} already exists`);
+      } else {
+        context.setState({
+          todos: context.state.todos.concat({ title: todoTitle }),
+          isWaitingUserInput: false,
+          userInput: null,
+        });
+        await context.sendText(`Add todo: ${todoTitle}`);
+      }
     } else if (isShortCutOf(SHORT_CUT.LIST_TODO, context.event.text)) {
       if (context.event.text.length === SHORT_CUT.LIST_TODO.length) {
         if (context.state.todos.length === 0) {
@@ -338,38 +359,45 @@ bot.onEvent(async (context) => {
       if (context.event.isQuickReply) {
         const { payload } = context.event.quickReply;
         if (isQuickReplyOf(QUICK_REPLY.ADD_TODO, payload)) {
-          const targetTodo = payload.slice(QUICK_REPLY.ADD_TODO.length + 1);
-          console.log(targetTodo);
-          context.setState({
-            todos: context.state.todos.concat({ title: targetTodo }),
-            isWaitingUserInput: false,
-            userInput: null,
-          });
-          await context.sendText(
-            `Add todo: ${targetTodo}!\n\nTo add a todo faster, you can simply enter "/a something todo" without clicking the Add todo button.\nFor example:\n/a ${todoTitle}`
-          );
+          const todoTitle = payload.slice(QUICK_REPLY.ADD_TODO.length + 1);
+          if (context.state.todos.findIndex(({ title }) => title === todoTitle) !== -1) {
+            context.setState({
+              isWaitingUserInput: false,
+              userInput: null,
+            });
+            await context.sendText(`Todo ${todoTitle} already exists`);
+          } else {
+            context.setState({
+              todos: context.state.todos.concat({ title: todoTitle }),
+              isWaitingUserInput: false,
+              userInput: null,
+            });
+            await context.sendText(
+              `Add todo: ${todoTitle}!\n\nTo add a todo faster, you can simply enter "/a something todo" without clicking the Add todo button.\nFor example:\n/a ${todoTitle}`
+            );
+          }
         } else if (isQuickReplyOf(QUICK_REPLY.VIEW_TODO, payload)) {
-          const targetTodo = payload.slice(QUICK_REPLY.VIEW_TODO.length + 1);
+          const todoTitle = payload.slice(QUICK_REPLY.VIEW_TODO.length + 1);
           const { title, reminder, dueDate, note } = context.state.todos.find(
-            ({ title }) => title === targetTodo
+            ({ title }) => title === todoTitle
           );
           await context.sendText(
             `${title}:\n${constructTodoSubtitle({ reminder, dueDate, note })}`
           );
         } else if (isQuickReplyOf(QUICK_REPLY.EDIT_TODO, payload)) {
-          const targetTodo = payload.slice(QUICK_REPLY.EDIT_TODO.length + 1);
+          const todoTitle = payload.slice(QUICK_REPLY.EDIT_TODO.length + 1);
           // TODO: Should use webview instead for more complicated flow
           context.setState({
-            userInput: { type: INPUT_TYPE.EDIT_TODO, payload: targetTodo },
+            userInput: { type: INPUT_TYPE.EDIT_TODO, payload: todoTitle },
             isWaitingUserInput: true,
           });
           await context.sendText(editTodoHint);
         } else if (isQuickReplyOf(QUICK_REPLY.DELETE_TODO, payload)) {
-          const targetTodo = payload.slice(QUICK_REPLY.DELETE_TODO.length + 1);
-          await deleteTodo(context, targetTodo);
+          const todoTitle = payload.slice(QUICK_REPLY.DELETE_TODO.length + 1);
+          await deleteTodo(context, todoTitle);
         } else if (isQuickReplyOf(QUICK_REPLY.CHOOSE_TODO, payload)) {
-          const targetTodo = payload.slice(QUICK_REPLY.CHOOSE_TODO.length + 1);
-          await listSingleTodo(context, targetTodo);
+          const todoTitle = payload.slice(QUICK_REPLY.CHOOSE_TODO.length + 1);
+          await listSingleTodo(context, todoTitle);
         }
       } else {
         const targetIdx = context.state.todos.findIndex(
