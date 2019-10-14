@@ -4,6 +4,10 @@ const paddingLeft = (value) => {
   return `${value < 10 ? '0' : ''}${value}`;
 };
 
+const isQuickReplyOf = (quickReplyType, payload) => {
+  return payload.slice(0, quickReplyType.length) === quickReplyType;
+};
+
 module.exports = {
   dCopy: (obj) => {
     if (obj === null) return null;
@@ -72,4 +76,5 @@ module.exports = {
       !isNaN(timeString.split(':')[1])
     );
   },
+  isQuickReplyOf,
 };

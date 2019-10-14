@@ -10,6 +10,7 @@ const {
   renderDueDate,
   renderReminder,
   isCorrectTimeFormat,
+  isQuickReplyOf,
 } = require('./utils');
 
 const bot = new MessengerBot({
@@ -138,6 +139,9 @@ const listSettings = async (context) => {
 };
 
 bot.onEvent(async (context) => {
+  const user = await context.getUserProfile();
+  console.log(user);
+
   if (context.state.isWaitingUserInput && context.event.isText) {
     switch (context.state.userInput.type) {
       case INPUT_TYPE.EDIT_TODO:
@@ -237,7 +241,7 @@ bot.onEvent(async (context) => {
       if (context.event.isQuickReply) {
         console.log('quickReply', context.event.quickReply);
         const { payload } = context.event.quickReply;
-        if (payload.slice(0, QUICK_REPLY.ADD_TODO.length) === QUICK_REPLY.ADD_TODO) {
+        if (isQuickReplyOf(QUICK_REPLY.ADD_TODO, payload)) {
           const targetTodo = payload.slice(QUICK_REPLY.ADD_TODO.length + 1);
           console.log(targetTodo);
           context.setState({
@@ -246,22 +250,73 @@ bot.onEvent(async (context) => {
             userInput: null,
           });
           await context.sendText(`Add todo: ${targetTodo}!`);
+        } else if (isQuickReplyOf(QUICK_REPLY.VIEW_TODO, payload)) {
+          const targetTodo = payload.slice(QUICK_REPLY.VIEW_TODO.length + 1);
+          const { title, reminder, dueDate, note } = context.state.todos.find(
+            ({ title }) => title === targetTodo
+          );
+          await context.sendText(
+            `${title}:\n${constructTodoSubtitle({ reminder, dueDate, note })}`
+          );
+        } else if (isQuickReplyOf(QUICK_REPLY.EDIT_TODO, payload)) {
+          const targetTodo = payload.slice(QUICK_REPLY.EDIT_TODO.length + 1);
+          // TODO: Should use webview instead for more complicated flow
+          context.setState({
+            userInput: { type: INPUT_TYPE.EDIT_TODO, payload: targetTodo },
+            isWaitingUserInput: true,
+          });
+          await context.sendText(
+            `Enter the todo info in the following format:\nD YYYY/MM/DD\nR YYYY/MM/DD/ HH:mm\nN Some notes here\n\nFor example:\nD 2020/02/01\nR 2020/01/01 13:00\nN Remember to call Jack first\n\nIf you only want to edit certain fields, you can just enter those (don't have to be in the same order as the example)\n\nFor example:\nR 2020/01/01 13:00\n\nFor more information, click Help in the menu!`
+          );
+        } else if (isQuickReplyOf(QUICK_REPLY.DELETE_TODO, payload)) {
+          const targetTodo = payload.slice(QUICK_REPLY.DELETE_TODO.length + 1);
+          await deleteTodo(context, targetTodo);
         }
       } else {
-        context.sendText('Pick an action', {
-          quick_replies: [
-            {
-              content_type: 'text',
-              title: `Add as todo`,
-              payload: `${QUICK_REPLY.ADD_TODO}/${context.event.text}`,
-            },
-            {
-              content_type: 'text',
-              title: `Nothing`,
-              payload: QUICK_REPLY.NOTHING,
-            },
-          ],
-        });
+        const targetIdx = context.state.todos.findIndex(
+          ({ title }) => title === context.event.text
+        );
+        if (targetIdx !== -1) {
+          context.sendText(`Todo "${context.event.text}" exists, you want to:`, {
+            quick_replies: [
+              {
+                content_type: 'text',
+                title: `View todo`,
+                payload: `${QUICK_REPLY.VIEW_TODO}/${context.event.text}`,
+              },
+              {
+                content_type: 'text',
+                title: `Edit todo`,
+                payload: `${QUICK_REPLY.EDIT_TODO}/${context.event.text}`,
+              },
+              {
+                content_type: 'text',
+                title: `Delete todo`,
+                payload: `${QUICK_REPLY.DELETE_TODO}/${context.event.text}`,
+              },
+              {
+                content_type: 'text',
+                title: `Nothing`,
+                payload: QUICK_REPLY.NOTHING,
+              },
+            ],
+          });
+        } else {
+          context.sendText('Pick an action', {
+            quick_replies: [
+              {
+                content_type: 'text',
+                title: `Add as todo`,
+                payload: `${QUICK_REPLY.ADD_TODO}/${context.event.text}`,
+              },
+              {
+                content_type: 'text',
+                title: `Nothing`,
+                payload: QUICK_REPLY.NOTHING,
+              },
+            ],
+          });
+        }
       }
     }
   } else {
