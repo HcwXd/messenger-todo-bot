@@ -69,6 +69,33 @@ const listTodos = async (context) => {
   );
 };
 
+const listSingleTodo = async (context, targetTodo) => {
+  const { title, reminder, dueDate, note } = context.state.todos.find(
+    ({ title }) => title === targetTodo
+  );
+  await context.sendGenericTemplate(
+    [
+      {
+        title: title,
+        subtitle: constructTodoSubtitle({ reminder, dueDate, note }),
+        buttons: [
+          {
+            type: 'postback',
+            title: POSTBACK_TITLE.EDIT_TODO,
+            payload: title,
+          },
+          {
+            type: 'postback',
+            title: POSTBACK_TITLE.DELETE_TODO,
+            payload: title,
+          },
+        ],
+      },
+    ],
+    { image_aspect_ratio: 'square' }
+  );
+};
+
 const deleteTodo = async (context, targetTodo) => {
   context.setState({
     todos: context.state.todos.filter(({ title }) => title !== targetTodo),
@@ -296,6 +323,9 @@ bot.onEvent(async (context) => {
         } else if (isQuickReplyOf(QUICK_REPLY.DELETE_TODO, payload)) {
           const targetTodo = payload.slice(QUICK_REPLY.DELETE_TODO.length + 1);
           await deleteTodo(context, targetTodo);
+        } else if (isQuickReplyOf(QUICK_REPLY.CHOOSE_TODO, payload)) {
+          const targetTodo = payload.slice(QUICK_REPLY.CHOOSE_TODO.length + 1);
+          await listSingleTodo(context, targetTodo);
         }
       } else {
         const targetIdx = context.state.todos.findIndex(
