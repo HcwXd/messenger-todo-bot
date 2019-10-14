@@ -323,7 +323,7 @@ bot.onEvent(async (context) => {
             isWaitingUserInput: true,
           });
           await context.sendText(
-            `Enter the todo info in the following format:\nD YYYY/MM/DD\nR YYYY/MM/DD/ HH:mm\nN Some notes here\n\nFor example:\nD 2020/02/01\nR 2020/01/01 13:00\nN Remember to call Jack first\n\nIf you only want to edit certain fields, you can just enter those (don't have to be in the same order as the example)\n\nFor example:\nR 2020/01/01 13:00\n\nFor more information, click Help in the menu!`
+            `Enter the todo info in the following format:\nD YYYY/MM/DD\nR YYYY/MM/DD HH:mm\nN Some notes here\n\nFor example:\nD 2020/02/01\nR 2020/01/01 13:00\nN Remember to call Jack first\n\nIf you only want to edit certain fields, you can just enter those (don't have to be in the same order as the example)\n\nFor example:\nR 2020/01/01 13:00\n\nFor more information, click Help in the menu!`
           );
         } else if (isQuickReplyOf(QUICK_REPLY.DELETE_TODO, payload)) {
           const targetTodo = payload.slice(QUICK_REPLY.DELETE_TODO.length + 1);
