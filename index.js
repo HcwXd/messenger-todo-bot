@@ -13,6 +13,7 @@ const {
   isQuickReplyOf,
   isShortCutOf,
 } = require('./utils');
+const { helpText } = require('./help');
 
 const bot = new MessengerBot({
   accessToken: config.accessToken,
@@ -288,6 +289,10 @@ bot.onEvent(async (context) => {
             }),
           }
         );
+      }
+    } else if (isShortCutOf(SHORT_CUT.HELP, context.event.text)) {
+      if (context.event.text.length === SHORT_CUT.HELP.length) {
+        await context.sendText(helpText);
       }
     } else {
       if (context.event.isQuickReply) {

@@ -18,6 +18,7 @@ module.exports = {
   SHORT_CUT: {
     ADD_TODO: '/a ',
     LIST_TODO: 'list',
+    HELP: `Help`,
   },
   QUICK_REPLY: {
     ADD_TODO: 'quickReply/addTodo',
