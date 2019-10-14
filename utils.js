@@ -8,6 +8,10 @@ const isQuickReplyOf = (quickReplyType, payload) => {
   return payload.slice(0, quickReplyType.length) === quickReplyType;
 };
 
+const isShortCutOf = (shortCutType, payload) => {
+  return payload.slice(0, shortCutType.length).toUpperCase() === shortCutType.toUpperCase();
+};
+
 module.exports = {
   dCopy: (obj) => {
     if (obj === null) return null;
@@ -77,4 +81,5 @@ module.exports = {
     );
   },
   isQuickReplyOf,
+  isShortCutOf,
 };

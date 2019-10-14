@@ -11,6 +11,7 @@ const {
   renderReminder,
   isCorrectTimeFormat,
   isQuickReplyOf,
+  isShortCutOf,
 } = require('./utils');
 
 const bot = new MessengerBot({
@@ -138,6 +139,9 @@ const listSettings = async (context) => {
   );
 };
 
+const constructShortCutListTo = (todos) =>
+  todos.map(({ title }, idx) => `${idx + 1}. ${title}`).join('\n');
+
 bot.onEvent(async (context) => {
   const user = await context.getUserProfile();
   console.log(user);
@@ -229,7 +233,7 @@ bot.onEvent(async (context) => {
         break;
     }
   } else if (context.event.isText) {
-    if (context.event.text.slice(0, 3) === SHORT_CUT.ADD_TODO) {
+    if (isShortCutOf(SHORT_CUT.ADD_TODO, context.event.text)) {
       const todoTitle = context.event.text.slice(3);
       context.setState({
         todos: context.state.todos.concat({ title: todoTitle }),
@@ -237,6 +241,27 @@ bot.onEvent(async (context) => {
         userInput: null,
       });
       await context.sendText(`Add todo: ${todoTitle}`);
+    } else if (isShortCutOf(SHORT_CUT.LIST_TODO, context.event.text)) {
+      if (context.event.text.length === SHORT_CUT.LIST_TODO.length) {
+        if (context.state.todos.length === 0) {
+          await context.sendText(`There's no todo in your list :-p`);
+          return;
+        }
+        context.sendText(
+          `Your Todo:\n${constructShortCutListTo(
+            context.state.todos
+          )}\nChoose the number you want to view:`,
+          {
+            quick_replies: context.state.todos.map(({ title }, idx) => {
+              return {
+                content_type: 'text',
+                title: `${idx + 1}`,
+                payload: `${QUICK_REPLY.CHOOSE_TODO}/${title}`,
+              };
+            }),
+          }
+        );
+      }
     } else {
       if (context.event.isQuickReply) {
         console.log('quickReply', context.event.quickReply);

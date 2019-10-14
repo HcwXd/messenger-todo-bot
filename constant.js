@@ -17,6 +17,7 @@ module.exports = {
   },
   SHORT_CUT: {
     ADD_TODO: '/a ',
+    LIST_TODO: 'list',
   },
   QUICK_REPLY: {
     ADD_TODO: 'quickReply/addTodo',
@@ -24,6 +25,7 @@ module.exports = {
     DELETE_TODO: 'quickReply/deleteTodo',
     EDIT_TODO: 'quickReply/editTodo',
     NOTHING: 'quickReply/nothing',
+    CHOOSE_TODO: 'quickReply/chooseTodo',
   },
   DAY_OF_WEEK: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
 };
