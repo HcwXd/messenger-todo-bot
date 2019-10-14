@@ -110,7 +110,9 @@ const updateTargetTodo = async (context, targetIdx) => {
   const editRawArray = editRawData.split('\n');
 
   editRawArray.forEach(async (editString) => {
-    if (editString[0] === 'R') {
+    if (editString[0] === 'T') {
+      updatedTodo.title = editString.slice(2);
+    } else if (editString[0] === 'R') {
       // Set Reminder
       let setData = editString.split(' ');
       if (setData.length !== 3) {
@@ -170,6 +172,32 @@ const listSettings = async (context) => {
 const constructShortCutListTo = (todos) =>
   todos.map(({ title }, idx) => `${idx + 1}. ${title}`).join('\n');
 
+const editTodoHint = `
+To edit the todo title, enter in the following format:
+T Some New Title
+
+To edit the due date, enter in the following format:
+D YYYY/MM/DD
+
+To edit the reminder, enter in following format:
+R YYYY/MM/DD HH:mm\
+
+To edit the notes, enter in following format:
+N Some notes here
+
+For example:
+T Call Jack and Bob
+D 2019/12/02
+R 2019/12/01 13:00
+N Remember to call Jack first
+If you only want to edit certain fields, you can enter those in any order
+
+For example:
+R 2020/01/01 13:00
+D 2020/01/01
+
+If you don't want to edit anything, enter "cancel"`;
+
 bot.onEvent(async (context) => {
   const user = await context.getUserProfile();
   console.log(user);
@@ -179,14 +207,29 @@ bot.onEvent(async (context) => {
       case INPUT_TYPE.EDIT_TODO:
         const targetTodoTitle = context.state.userInput.payload;
         const targetIdx = context.state.todos.findIndex(({ title }) => title === targetTodoTitle);
-        const editTodo = await updateTargetTodo(context, targetIdx);
-
-        await context.sendText(`Update ${targetTodoTitle}`);
-        context.setState({
-          todos: replaceArrayItemByIndex(context.state.todos, targetIdx, editTodo),
-          isWaitingUserInput: false,
-          userInput: null,
-        });
+        if (targetIdx !== -1) {
+          if (context.event.text === 'cancel') {
+            await context.sendText(`Cancel update ${targetTodoTitle}`);
+            context.setState({
+              isWaitingUserInput: false,
+              userInput: null,
+            });
+          } else {
+            const editTodo = await updateTargetTodo(context, targetIdx);
+            await context.sendText(`Update ${targetTodoTitle}`);
+            context.setState({
+              todos: replaceArrayItemByIndex(context.state.todos, targetIdx, editTodo),
+              isWaitingUserInput: false,
+              userInput: null,
+            });
+          }
+        } else {
+          await context.sendText(`Update ${targetTodoTitle} failed. Please try again later`);
+          context.setState({
+            isWaitingUserInput: false,
+            userInput: null,
+          });
+        }
         break;
       case INPUT_TYPE.ADD_TODO:
         const todoTitle = context.event.text;
@@ -225,9 +268,7 @@ bot.onEvent(async (context) => {
           userInput: { type: INPUT_TYPE.EDIT_TODO, payload: context.event.postback.payload },
           isWaitingUserInput: true,
         });
-        await context.sendText(
-          `To edit the due date, enter in the following format:\nD YYYY/MM/DD\n\nTo edit the reminder, enter in following format:\nR YYYY/MM/DD HH:mm\n\nTo edit the notes, enter in following format:\nN Some notes here\n\nFor example:\nD 2020/02/01\nR 2020/01/01 13:00\nN Remember to call Jack first\n\nIf you want to edit mutiple fields at the same time, you can just enter those in any order\n\nFor example:\nR 2020/01/01 13:00\nD 2020/01/01\n`
-        );
+        await context.sendText(editTodoHint);
         break;
       case POSTBACK_TITLE.ADD_TODO:
         context.setState({
@@ -295,7 +336,6 @@ bot.onEvent(async (context) => {
       }
     } else {
       if (context.event.isQuickReply) {
-        console.log('quickReply', context.event.quickReply);
         const { payload } = context.event.quickReply;
         if (isQuickReplyOf(QUICK_REPLY.ADD_TODO, payload)) {
           const targetTodo = payload.slice(QUICK_REPLY.ADD_TODO.length + 1);
@@ -323,9 +363,7 @@ bot.onEvent(async (context) => {
             userInput: { type: INPUT_TYPE.EDIT_TODO, payload: targetTodo },
             isWaitingUserInput: true,
           });
-          await context.sendText(
-            `Enter the todo info in the following format:\nD YYYY/MM/DD\nR YYYY/MM/DD HH:mm\nN Some notes here\n\nFor example:\nD 2020/02/01\nR 2020/01/01 13:00\nN Remember to call Jack first\n\nIf you only want to edit certain fields, you can just enter those (don't have to be in the same order as the example)\n\nFor example:\nR 2020/01/01 13:00\n\nFor more information, click Help in the menu!`
-          );
+          await context.sendText(editTodoHint);
         } else if (isQuickReplyOf(QUICK_REPLY.DELETE_TODO, payload)) {
           const targetTodo = payload.slice(QUICK_REPLY.DELETE_TODO.length + 1);
           await deleteTodo(context, targetTodo);
