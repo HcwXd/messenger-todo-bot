@@ -4,6 +4,7 @@ if (process.env.NODE_ENV === 'dev') {
   require('dotenv').config();
 }
 const { POSTBACK_TITLE } = require('./constant');
+const { helpText } = require('./help');
 
 module.exports = {
   messenger: {
@@ -19,7 +20,7 @@ module.exports = {
       greeting: [
         {
           locale: 'default',
-          text: 'Welcome to use TODO BOT',
+          text: helpText,
         },
       ],
       persistent_menu: [
