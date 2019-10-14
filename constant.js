@@ -18,5 +18,9 @@ module.exports = {
   SHORT_CUT: {
     ADD_TODO: '/a ',
   },
+  QUICK_REPLY: {
+    ADD_TODO: 'quickReply/addTodo',
+    NOTHING: 'quickReply/nothing',
+  },
   DAY_OF_WEEK: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
 };

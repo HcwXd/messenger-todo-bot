@@ -1,7 +1,7 @@
 const { MessengerBot, FileSessionStore } = require('bottender');
 const { createServer } = require('bottender/express');
 const config = require('./bottender.config').messenger;
-const { POSTBACK_TITLE, INPUT_TYPE, SHORT_CUT } = require('./constant');
+const { POSTBACK_TITLE, INPUT_TYPE, SHORT_CUT, QUICK_REPLY } = require('./constant');
 const {
   dCopy,
   replaceArrayItemByIndex,
@@ -234,7 +234,35 @@ bot.onEvent(async (context) => {
       });
       await context.sendText(`Add todo: ${todoTitle}`);
     } else {
-      await context.sendText(`Hello :)`);
+      if (context.event.isQuickReply) {
+        console.log('quickReply', context.event.quickReply);
+        const { payload } = context.event.quickReply;
+        if (payload.slice(0, QUICK_REPLY.ADD_TODO.length) === QUICK_REPLY.ADD_TODO) {
+          const targetTodo = payload.slice(QUICK_REPLY.ADD_TODO.length + 1);
+          console.log(targetTodo);
+          context.setState({
+            todos: context.state.todos.concat({ title: targetTodo }),
+            isWaitingUserInput: false,
+            userInput: null,
+          });
+          await context.sendText(`Add todo: ${targetTodo}!`);
+        }
+      } else {
+        context.sendText('Pick an action', {
+          quick_replies: [
+            {
+              content_type: 'text',
+              title: `Add as todo`,
+              payload: `${QUICK_REPLY.ADD_TODO}/${context.event.text}`,
+            },
+            {
+              content_type: 'text',
+              title: `Nothing`,
+              payload: QUICK_REPLY.NOTHING,
+            },
+          ],
+        });
+      }
     }
   } else {
     await context.sendText(`Hello :)`);
