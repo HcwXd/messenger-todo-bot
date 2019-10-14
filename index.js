@@ -36,8 +36,8 @@ const sendWrongFormat = async (context, value, type) => {
 
 const constructTodoSubtitle = ({ reminder, dueDate, note }) => {
   let subtitle = '';
-  if (dueDate) subtitle += `Due ${renderDueDate(dueDate)}\n`;
-  if (reminder) subtitle += `Remind me at ${renderReminder(reminder)}\n`;
+  subtitle += dueDate ? `Due ${renderDueDate(dueDate)}\n` : `No due date\n`;
+  subtitle += reminder ? `Remind me at ${renderReminder(reminder)}\n` : `No reminder\n`;
   if (note) subtitle += `Note: ${note}`;
   return subtitle;
 };
@@ -226,9 +226,8 @@ bot.onEvent(async (context) => {
           isWaitingUserInput: true,
         });
         await context.sendText(
-          `Enter the todo info in the following format:\nD YYYY/MM/DD\nR YYYY/MM/DD/ HH:mm\nN Some notes here\n\nFor example:\nD 2020/02/01\nR 2020/01/01 13:00\nN Remember to call Jack first\n\nIf you only want to edit certain fields, you can just enter those (don't have to be in the same order as the example)\n\nFor example:\nR 2020/01/01 13:00\n\nFor more information, click Help in the menu!`
+          `To edit the due date, enter in the following format:\nD YYYY/MM/DD\n\nTo edit the reminder, enter in following format:\nR YYYY/MM/DD HH:mm\n\nTo edit the notes, enter in following format:\nN Some notes here\n\nFor example:\nD 2020/02/01\nR 2020/01/01 13:00\nN Remember to call Jack first\n\nIf you want to edit mutiple fields at the same time, you can just enter those in any order\n\nFor example:\nR 2020/01/01 13:00\nD 2020/01/01\n`
         );
-
         break;
       case POSTBACK_TITLE.ADD_TODO:
         context.setState({
@@ -306,7 +305,9 @@ bot.onEvent(async (context) => {
             isWaitingUserInput: false,
             userInput: null,
           });
-          await context.sendText(`Add todo: ${targetTodo}!`);
+          await context.sendText(
+            `Add todo: ${targetTodo}!\n\nTo add a todo faster, you can simply enter "/a something todo" without clicking the Add todo button.\nFor example:\n/a ${todoTitle}`
+          );
         } else if (isQuickReplyOf(QUICK_REPLY.VIEW_TODO, payload)) {
           const targetTodo = payload.slice(QUICK_REPLY.VIEW_TODO.length + 1);
           const { title, reminder, dueDate, note } = context.state.todos.find(
