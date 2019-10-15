@@ -206,8 +206,10 @@ If you don't want to edit anything, enter "cancel"`;
 bot.onEvent(async (context) => {
   const user = await context.getUserProfile();
   console.log(user);
-
-  if (context.state.isWaitingUserInput && context.event.isText) {
+  if (context.event.payload === 'GET_STARTED') {
+    await context.sendText(helpText);
+    await context.sendText("Let's add your first todo by simply entering a todo item!");
+  } else if (context.state.isWaitingUserInput && context.event.isText) {
     switch (context.state.userInput.type) {
       case INPUT_TYPE.EDIT_TODO:
         const targetTodoTitle = context.state.userInput.payload;
