@@ -175,20 +175,23 @@ const listSettings = async (context) => {
 };
 
 const sendQuickReplyAfterAddingTodo = async (context, todoTitle) => {
-  context.sendText(`You can add due date and reminder of the todo by clicking the edit button`, {
-    quick_replies: [
-      {
-        content_type: 'text',
-        title: `Edit`,
-        payload: `${QUICK_REPLY.EDIT_TODO}/${todoTitle}`,
-      },
-      {
-        content_type: 'text',
-        title: `Nothing`,
-        payload: QUICK_REPLY.NOTHING,
-      },
-    ],
-  });
+  context.sendText(
+    `You can add due date and reminder of the todo by clicking the edit button. Or ignore the button add those later`,
+    {
+      quick_replies: [
+        {
+          content_type: 'text',
+          title: `Edit`,
+          payload: `${QUICK_REPLY.EDIT_TODO}/${todoTitle}`,
+        },
+        {
+          content_type: 'text',
+          title: `Nothing`,
+          payload: QUICK_REPLY.NOTHING,
+        },
+      ],
+    }
+  );
 };
 
 const constructShortCutListTo = (todos) =>
