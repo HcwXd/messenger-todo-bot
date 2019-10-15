@@ -185,7 +185,7 @@ To edit the due date, enter in the following format:
 D YYYY/MM/DD
 
 To edit the reminder, enter in following format:
-R YYYY/MM/DD HH:mm\
+R YYYY/MM/DD HH:mm
 
 To edit the notes, enter in following format:
 N Some notes here
