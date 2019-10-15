@@ -195,8 +195,8 @@ T Call Jack and Bob
 D 2019/12/02
 R 2019/12/01 13:00
 N Remember to call Jack first
-If you only want to edit certain fields, you can enter those in any order
 
+If you only want to edit certain fields, you can enter those in any order.
 For example:
 R 2020/01/01 13:00
 D 2020/01/01
@@ -251,7 +251,7 @@ bot.onEvent(async (context) => {
             userInput: null,
           });
           await context.sendText(
-            `Add todo: ${todoTitle}.\n\nTo add a todo faster, you can simply enter "/a something todo" without clicking the Add todo button.\nFor example:\n/a ${todoTitle}`
+            `Add todo: ${todoTitle}.\n\nTo add a todo faster, you can simply enter "/a something todo".\nFor example:\n/a ${todoTitle}`
           );
         }
         break;
@@ -339,7 +339,7 @@ bot.onEvent(async (context) => {
         context.sendText(
           `Your Todo:\n${constructShortCutListTo(
             context.state.todos
-          )}\nChoose the number you want to view:`,
+          )}\n\nChoose the index of the todo you want to view or edit:`,
           {
             quick_replies: context.state.todos.map(({ title }, idx) => {
               return {
@@ -373,7 +373,7 @@ bot.onEvent(async (context) => {
               userInput: null,
             });
             await context.sendText(
-              `Add todo: ${todoTitle}!\n\nTo add a todo faster, you can simply enter "/a something todo" without clicking the Add todo button.\nFor example:\n/a ${todoTitle}`
+              `Add todo: ${todoTitle}!\n\nTo add a todo faster, you can simply enter "/a something todo".\nFor example:\n/a ${todoTitle}`
             );
           }
         } else if (isQuickReplyOf(QUICK_REPLY.VIEW_TODO, payload)) {
