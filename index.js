@@ -174,6 +174,23 @@ const listSettings = async (context) => {
   );
 };
 
+const sendQuickReplyAfterAddingTodo = async (context, todoTitle) => {
+  context.sendText(`You can add due date and reminder of the todo by clicking the edit button`, {
+    quick_replies: [
+      {
+        content_type: 'text',
+        title: `Edit`,
+        payload: `${QUICK_REPLY.EDIT_TODO}/${todoTitle}`,
+      },
+      {
+        content_type: 'text',
+        title: `Nothing`,
+        payload: QUICK_REPLY.NOTHING,
+      },
+    ],
+  });
+};
+
 const constructShortCutListTo = (todos) =>
   todos.map(({ title }, idx) => `${idx + 1}. ${title}`).join('\n');
 
@@ -253,8 +270,9 @@ bot.onEvent(async (context) => {
             userInput: null,
           });
           await context.sendText(
-            `Add todo: ${todoTitle}.\n\nTo add a todo faster, you can simply enter "/a something todo".\nFor example:\n/a ${todoTitle}`
+            `Add todo: ${todoTitle}..\n\nTo add a todo faster, you can simply enter "/a something todo".\nFor example:\n/a ${todoTitle}`
           );
+          await sendQuickReplyAfterAddingTodo(context, todoTitle);
         }
         break;
       case INPUT_TYPE.SET_DAILY_REMINDER:
@@ -330,7 +348,8 @@ bot.onEvent(async (context) => {
           isWaitingUserInput: false,
           userInput: null,
         });
-        await context.sendText(`Add todo: ${todoTitle}`);
+        await context.sendText(`Add todo: ${todoTitle}.`);
+        await sendQuickReplyAfterAddingTodo(context, todoTitle);
       }
     } else if (isShortCutOf(SHORT_CUT.LIST_TODO, context.event.text)) {
       if (context.event.text.length === SHORT_CUT.LIST_TODO.length) {
@@ -377,6 +396,7 @@ bot.onEvent(async (context) => {
             await context.sendText(
               `Add todo: ${todoTitle}!\n\nTo add a todo faster, you can simply enter "/a something todo".\nFor example:\n/a ${todoTitle}`
             );
+            await sendQuickReplyAfterAddingTodo(context, todoTitle);
           }
         } else if (isQuickReplyOf(QUICK_REPLY.VIEW_TODO, payload)) {
           const todoTitle = payload.slice(QUICK_REPLY.VIEW_TODO.length + 1);
@@ -384,7 +404,7 @@ bot.onEvent(async (context) => {
             ({ title }) => title === todoTitle
           );
           await context.sendText(
-            `${title}:\n${constructTodoSubtitle({ reminder, dueDate, note })}`
+            `# ${title}\n${constructTodoSubtitle({ reminder, dueDate, note })}`
           );
         } else if (isQuickReplyOf(QUICK_REPLY.EDIT_TODO, payload)) {
           const todoTitle = payload.slice(QUICK_REPLY.EDIT_TODO.length + 1);
@@ -406,7 +426,7 @@ bot.onEvent(async (context) => {
           ({ title }) => title === context.event.text
         );
         if (targetIdx !== -1) {
-          context.sendText(`Todo "${context.event.text}" exists, you want to:`, {
+          await context.sendText(`Todo "${context.event.text}" exists, you want to:`, {
             quick_replies: [
               {
                 content_type: 'text',
@@ -431,7 +451,7 @@ bot.onEvent(async (context) => {
             ],
           });
         } else {
-          context.sendText('Pick an action', {
+          await context.sendText('Pick an action', {
             quick_replies: [
               {
                 content_type: 'text',
