@@ -4,7 +4,7 @@ if (process.env.NODE_ENV === 'dev') {
   require('dotenv').config();
 }
 const { POSTBACK_TITLE } = require('./constant');
-const { helpText } = require('./help');
+const { helpText } = require('./helpText');
 
 module.exports = {
   messenger: {

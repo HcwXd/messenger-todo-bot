@@ -13,7 +13,7 @@ const {
   isQuickReplyOf,
   isShortCutOf,
 } = require('./utils');
-const { helpText } = require('./help');
+const { helpText } = require('./helpText');
 
 const bot = new MessengerBot({
   accessToken: config.accessToken,
@@ -189,7 +189,7 @@ const sendQuickReplyAfterAddingTodo = async (context, todoTitle) => {
   );
 };
 
-const constructShortCutListTo = (todos) =>
+const constructShortCutTodoList = (todos) =>
   todos.map(({ title }, idx) => `${idx + 1}. ${title}`).join('\n');
 
 const editTodoHint = `
@@ -356,7 +356,7 @@ bot.onEvent(async (context) => {
           return;
         }
         context.sendText(
-          `Your Todo:\n${constructShortCutListTo(
+          `Your Todo:\n${constructShortCutTodoList(
             context.state.todos
           )}\n\nChoose the index of the todo you want to view or edit:`,
           {
