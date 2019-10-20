@@ -34,7 +34,7 @@ const findDailyReminder = async (id, { todos, prefs }) => {
     const [hour, minute] = prefs.dailyReminder.split(':');
     const nowHour =
       new Date().getHours() + 8 > 23 ? new Date().getHours() + 8 - 24 : new Date().getHours() + 8;
-    if (+hour === nowHour && +minute === new Date().getMinutes()) {
+    if (+hour === nowHour && +minute === new Date().getMinutes() && todos.length > 0) {
       const message = constuctDailyReminderMessage(todos);
       await sendReminder({ id, message });
     }
