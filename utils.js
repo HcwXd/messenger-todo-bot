@@ -62,16 +62,6 @@ const renderDueDate = (dueDate) => {
     : `${year}/${month}/${date} (${day})`;
 };
 
-const renderDueDate = (dueDate) => {
-  const year = new Date(dueDate).getFullYear();
-  const month = paddingLeft(new Date(dueDate).getMonth() + 1);
-  const date = paddingLeft(new Date(dueDate).getDate());
-  const day = paddingLeft(DAY_OF_WEEK[new Date(dueDate).getDay()]);
-  return year === new Date().getFullYear()
-    ? `${month}/${date} (${day})`
-    : `${year}/${month}/${date} (${day})`;
-};
-
 const renderReminder = (reminder) => {
   const year = new Date(reminder).getFullYear();
   const month = paddingLeft(new Date(reminder).getMonth() + 1);
