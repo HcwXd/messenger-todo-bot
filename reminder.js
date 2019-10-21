@@ -25,7 +25,7 @@ const constuctDailyReminderMessage = (todos) => {
 };
 
 const constuctTodoReminderMessage = ({ title, dueDate }) => {
-  const text = `# Reminder\n${title}\n- Due ${renderDueDate(dueDate)}`;
+  const text = `# Reminder\n${title}\n${dueDate ? `- Due ${renderDueDate(dueDate)}` : ''}`;
   return { text };
 };
 

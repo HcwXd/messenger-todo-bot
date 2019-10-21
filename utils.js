@@ -53,10 +53,12 @@ const getTimestampFromReminder = (reminder) => {
   return new Date(year, month - 1, day, hour - 8, minute);
 };
 const renderDueDate = (dueDate) => {
-  const year = new Date(dueDate).getFullYear();
-  const month = paddingLeft(new Date(dueDate).getMonth() + 1);
-  const date = paddingLeft(new Date(dueDate).getDate());
-  const day = paddingLeft(DAY_OF_WEEK[new Date(dueDate).getDay()]);
+  const timeStamp = new Date(dueDate);
+  timeStamp.setHours(timeStamp.getHours() + 8);
+  const year = timeStamp.getFullYear();
+  const month = paddingLeft(timeStamp.getMonth() + 1);
+  const date = paddingLeft(timeStamp.getDate());
+  const day = paddingLeft(DAY_OF_WEEK[timeStamp.getDay()]);
   return year === new Date().getFullYear()
     ? `${month}/${date} (${day})`
     : `${year}/${month}/${date} (${day})`;
