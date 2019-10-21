@@ -221,10 +221,15 @@ If you don't want to edit anything, enter "cancel"`;
 bot.onEvent(async (context) => {
   const user = await context.getUserProfile();
   console.log(user);
+  /**  Get Started Message */
   if (context.event.payload === 'GET_STARTED') {
     await context.sendText(helpText);
     await context.sendText("Let's add your first todo by simply entering a name of a todo item!");
-  } else if (context.state.isWaitingUserInput && context.event.isText) {
+    return;
+  }
+
+  /**  User input after instruction */
+  if (context.state.isWaitingUserInput && context.event.isText) {
     switch (context.state.userInput.type) {
       case INPUT_TYPE.EDIT_TODO:
         const targetTodoTitle = context.state.userInput.payload;
@@ -291,7 +296,11 @@ bot.onEvent(async (context) => {
         }
         break;
     }
-  } else if (context.event.isPostback) {
+    return;
+  }
+
+  /**  Button action */
+  if (context.event.isPostback) {
     switch (context.event.postback.title) {
       case POSTBACK_TITLE.EDIT_TODO:
         // TODO: Should use webview instead for more complicated flow
@@ -331,7 +340,57 @@ bot.onEvent(async (context) => {
         await context.sendText(`Hello :)`);
         break;
     }
-  } else if (context.event.isText) {
+    return;
+  }
+
+  /**  Quick Reply */
+  if (context.event.isQuickReply) {
+    const { payload } = context.event.quickReply;
+    if (isQuickReplyOf(QUICK_REPLY.ADD_TODO, payload)) {
+      const todoTitle = payload.slice(QUICK_REPLY.ADD_TODO.length + 1);
+      if (context.state.todos.findIndex(({ title }) => title === todoTitle) !== -1) {
+        context.setState({
+          isWaitingUserInput: false,
+          userInput: null,
+        });
+        await context.sendText(`Todo ${todoTitle} already exists`);
+      } else {
+        context.setState({
+          todos: context.state.todos.concat({ title: todoTitle }),
+          isWaitingUserInput: false,
+          userInput: null,
+        });
+        await context.sendText(
+          `Add todo: ${todoTitle}!\n\nTo add a todo faster, you can simply enter "/a something todo".\nFor example:\n/a ${todoTitle}`
+        );
+        await sendQuickReplyAfterAddingTodo(context, todoTitle);
+      }
+    } else if (isQuickReplyOf(QUICK_REPLY.VIEW_TODO, payload)) {
+      const todoTitle = payload.slice(QUICK_REPLY.VIEW_TODO.length + 1);
+      const { title, reminder, dueDate, note } = context.state.todos.find(
+        ({ title }) => title === todoTitle
+      );
+      await context.sendText(`# ${title}\n${constructTodoSubtitle({ reminder, dueDate, note })}`);
+    } else if (isQuickReplyOf(QUICK_REPLY.EDIT_TODO, payload)) {
+      const todoTitle = payload.slice(QUICK_REPLY.EDIT_TODO.length + 1);
+      // TODO: Should use webview instead for more complicated flow
+      context.setState({
+        userInput: { type: INPUT_TYPE.EDIT_TODO, payload: todoTitle },
+        isWaitingUserInput: true,
+      });
+      await context.sendText(editTodoHint);
+    } else if (isQuickReplyOf(QUICK_REPLY.DELETE_TODO, payload)) {
+      const todoTitle = payload.slice(QUICK_REPLY.DELETE_TODO.length + 1);
+      await deleteTodo(context, todoTitle);
+    } else if (isQuickReplyOf(QUICK_REPLY.CHOOSE_TODO, payload)) {
+      const todoTitle = payload.slice(QUICK_REPLY.CHOOSE_TODO.length + 1);
+      await listSingleTodo(context, todoTitle);
+    }
+    return;
+  }
+
+  /**  Userinput initiated by user && Shortcut text */
+  if (context.event.isText) {
     if (isShortCutOf(SHORT_CUT.ADD_TODO, context.event.text)) {
       const todoTitle = context.event.text.slice(3);
       if (context.state.todos.findIndex(({ title }) => title === todoTitle) !== -1) {
@@ -375,100 +434,53 @@ bot.onEvent(async (context) => {
         await context.sendText(helpText);
       }
     } else {
-      if (context.event.isQuickReply) {
-        const { payload } = context.event.quickReply;
-        if (isQuickReplyOf(QUICK_REPLY.ADD_TODO, payload)) {
-          const todoTitle = payload.slice(QUICK_REPLY.ADD_TODO.length + 1);
-          if (context.state.todos.findIndex(({ title }) => title === todoTitle) !== -1) {
-            context.setState({
-              isWaitingUserInput: false,
-              userInput: null,
-            });
-            await context.sendText(`Todo ${todoTitle} already exists`);
-          } else {
-            context.setState({
-              todos: context.state.todos.concat({ title: todoTitle }),
-              isWaitingUserInput: false,
-              userInput: null,
-            });
-            await context.sendText(
-              `Add todo: ${todoTitle}!\n\nTo add a todo faster, you can simply enter "/a something todo".\nFor example:\n/a ${todoTitle}`
-            );
-            await sendQuickReplyAfterAddingTodo(context, todoTitle);
-          }
-        } else if (isQuickReplyOf(QUICK_REPLY.VIEW_TODO, payload)) {
-          const todoTitle = payload.slice(QUICK_REPLY.VIEW_TODO.length + 1);
-          const { title, reminder, dueDate, note } = context.state.todos.find(
-            ({ title }) => title === todoTitle
-          );
-          await context.sendText(
-            `# ${title}\n${constructTodoSubtitle({ reminder, dueDate, note })}`
-          );
-        } else if (isQuickReplyOf(QUICK_REPLY.EDIT_TODO, payload)) {
-          const todoTitle = payload.slice(QUICK_REPLY.EDIT_TODO.length + 1);
-          // TODO: Should use webview instead for more complicated flow
-          context.setState({
-            userInput: { type: INPUT_TYPE.EDIT_TODO, payload: todoTitle },
-            isWaitingUserInput: true,
-          });
-          await context.sendText(editTodoHint);
-        } else if (isQuickReplyOf(QUICK_REPLY.DELETE_TODO, payload)) {
-          const todoTitle = payload.slice(QUICK_REPLY.DELETE_TODO.length + 1);
-          await deleteTodo(context, todoTitle);
-        } else if (isQuickReplyOf(QUICK_REPLY.CHOOSE_TODO, payload)) {
-          const todoTitle = payload.slice(QUICK_REPLY.CHOOSE_TODO.length + 1);
-          await listSingleTodo(context, todoTitle);
-        }
+      const targetIdx = context.state.todos.findIndex(({ title }) => title === context.event.text);
+      if (targetIdx !== -1) {
+        await context.sendText(`Todo "${context.event.text}" exists, you want to:`, {
+          quick_replies: [
+            {
+              content_type: 'text',
+              title: `View todo`,
+              payload: `${QUICK_REPLY.VIEW_TODO}/${context.event.text}`,
+            },
+            {
+              content_type: 'text',
+              title: `Edit todo`,
+              payload: `${QUICK_REPLY.EDIT_TODO}/${context.event.text}`,
+            },
+            {
+              content_type: 'text',
+              title: `Delete todo`,
+              payload: `${QUICK_REPLY.DELETE_TODO}/${context.event.text}`,
+            },
+            {
+              content_type: 'text',
+              title: `Nothing`,
+              payload: QUICK_REPLY.NOTHING,
+            },
+          ],
+        });
       } else {
-        const targetIdx = context.state.todos.findIndex(
-          ({ title }) => title === context.event.text
-        );
-        if (targetIdx !== -1) {
-          await context.sendText(`Todo "${context.event.text}" exists, you want to:`, {
-            quick_replies: [
-              {
-                content_type: 'text',
-                title: `View todo`,
-                payload: `${QUICK_REPLY.VIEW_TODO}/${context.event.text}`,
-              },
-              {
-                content_type: 'text',
-                title: `Edit todo`,
-                payload: `${QUICK_REPLY.EDIT_TODO}/${context.event.text}`,
-              },
-              {
-                content_type: 'text',
-                title: `Delete todo`,
-                payload: `${QUICK_REPLY.DELETE_TODO}/${context.event.text}`,
-              },
-              {
-                content_type: 'text',
-                title: `Nothing`,
-                payload: QUICK_REPLY.NOTHING,
-              },
-            ],
-          });
-        } else {
-          await context.sendText('Pick an action', {
-            quick_replies: [
-              {
-                content_type: 'text',
-                title: `Add as todo`,
-                payload: `${QUICK_REPLY.ADD_TODO}/${context.event.text}`,
-              },
-              {
-                content_type: 'text',
-                title: `Nothing`,
-                payload: QUICK_REPLY.NOTHING,
-              },
-            ],
-          });
-        }
+        await context.sendText('Pick an action', {
+          quick_replies: [
+            {
+              content_type: 'text',
+              title: `Add as todo`,
+              payload: `${QUICK_REPLY.ADD_TODO}/${context.event.text}`,
+            },
+            {
+              content_type: 'text',
+              title: `Nothing`,
+              payload: QUICK_REPLY.NOTHING,
+            },
+          ],
+        });
       }
     }
-  } else {
-    await context.sendText(`Hello :)`);
+    return;
   }
+
+  await context.sendText(`Hello :)`);
 });
 
 const server = createServer(bot, { verifyToken: config.verifyToken });
