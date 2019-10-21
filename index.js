@@ -274,6 +274,47 @@ const handleShortCutListTodo = async (context) => {
   }
 };
 
+const handleInputEditTodo = async (context, targetTodoTitle, targetIdx) => {
+  if (targetIdx !== -1) {
+    if (context.event.text === 'cancel') {
+      await context.sendText(`Cancel update ${targetTodoTitle}`);
+    } else {
+      const editTodo = await updateTargetTodo(context, targetIdx);
+      await context.sendText(`Update ${targetTodoTitle}`);
+      context.setState({
+        todos: replaceArrayItemByIndex(context.state.todos, targetIdx, editTodo),
+      });
+    }
+  } else {
+    await context.sendText(`Update ${targetTodoTitle} failed. Please try again later`);
+  }
+};
+
+const handleInputAddTodo = async (context, todoTitle) => {
+  if (context.state.todos.findIndex(({ title }) => title === todoTitle) !== -1) {
+    await context.sendText(`Todo ${todoTitle} already exists`);
+  } else {
+    context.setState({
+      todos: context.state.todos.concat({ title: todoTitle }),
+    });
+    await context.sendText(
+      `Add todo: ${todoTitle}..\n\nTo add a todo faster, you can simply enter "/a something todo".\nFor example:\n/a ${todoTitle}`
+    );
+    await sendQuickReplyAfterAddingTodo(context, todoTitle);
+  }
+};
+
+const handleInputSetDailyReminder = async (context, dailyReminder) => {
+  if (isCorrectTimeFormat(dailyReminder)) {
+    context.setState({
+      prefs: { ...context.state.prefs, dailyReminder },
+    });
+    await context.sendText(`Set daily reminder: ${dailyReminder}`);
+  } else {
+    await sendWrongFormat(context, dailyReminder, INPUT_TYPE.SET_DAILY_REMINDER);
+  }
+};
+
 const constructShortCutTodoList = (todos) =>
   todos.map(({ title }, idx) => `${idx + 1}. ${title}`).join('\n');
 
@@ -319,68 +360,21 @@ bot.onEvent(async (context) => {
       case INPUT_TYPE.EDIT_TODO:
         const targetTodoTitle = context.state.userInput.payload;
         const targetIdx = context.state.todos.findIndex(({ title }) => title === targetTodoTitle);
-        if (targetIdx !== -1) {
-          if (context.event.text === 'cancel') {
-            await context.sendText(`Cancel update ${targetTodoTitle}`);
-            context.setState({
-              isWaitingUserInput: false,
-              userInput: null,
-            });
-          } else {
-            const editTodo = await updateTargetTodo(context, targetIdx);
-            await context.sendText(`Update ${targetTodoTitle}`);
-            context.setState({
-              todos: replaceArrayItemByIndex(context.state.todos, targetIdx, editTodo),
-              isWaitingUserInput: false,
-              userInput: null,
-            });
-          }
-        } else {
-          await context.sendText(`Update ${targetTodoTitle} failed. Please try again later`);
-          context.setState({
-            isWaitingUserInput: false,
-            userInput: null,
-          });
-        }
+        await handleInputEditTodo(context, targetTodoTitle, targetIdx);
         break;
       case INPUT_TYPE.ADD_TODO:
         const todoTitle = context.event.text;
-        if (context.state.todos.findIndex(({ title }) => title === todoTitle) !== -1) {
-          context.setState({
-            isWaitingUserInput: false,
-            userInput: null,
-          });
-          await context.sendText(`Todo ${todoTitle} already exists`);
-        } else {
-          context.setState({
-            todos: context.state.todos.concat({ title: todoTitle }),
-            isWaitingUserInput: false,
-            userInput: null,
-          });
-          await context.sendText(
-            `Add todo: ${todoTitle}..\n\nTo add a todo faster, you can simply enter "/a something todo".\nFor example:\n/a ${todoTitle}`
-          );
-          await sendQuickReplyAfterAddingTodo(context, todoTitle);
-        }
+        await handleInputAddTodo(context, todoTitle);
         break;
       case INPUT_TYPE.SET_DAILY_REMINDER:
         const dailyReminder = context.event.text;
-        if (isCorrectTimeFormat(dailyReminder)) {
-          context.setState({
-            prefs: { ...context.state.prefs, dailyReminder },
-            isWaitingUserInput: false,
-            userInput: null,
-          });
-          await context.sendText(`Set daily reminder: ${dailyReminder}`);
-        } else {
-          context.setState({
-            isWaitingUserInput: false,
-            userInput: null,
-          });
-          await sendWrongFormat(context, dailyReminder, INPUT_TYPE.SET_DAILY_REMINDER);
-        }
+        await handleInputSetDailyReminder(context, dailyReminder);
         break;
     }
+    context.setState({
+      isWaitingUserInput: false,
+      userInput: null,
+    });
     return;
   }
 
