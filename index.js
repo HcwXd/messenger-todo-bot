@@ -189,6 +189,91 @@ const sendQuickReplyAfterAddingTodo = async (context, todoTitle) => {
   );
 };
 
+const handleInputExistTodo = async (context) => {
+  await context.sendText(`Todo "${context.event.text}" exists, you want to:`, {
+    quick_replies: [
+      {
+        content_type: 'text',
+        title: `View todo`,
+        payload: `${QUICK_REPLY.VIEW_TODO}/${context.event.text}`,
+      },
+      {
+        content_type: 'text',
+        title: `Edit todo`,
+        payload: `${QUICK_REPLY.EDIT_TODO}/${context.event.text}`,
+      },
+      {
+        content_type: 'text',
+        title: `Delete todo`,
+        payload: `${QUICK_REPLY.DELETE_TODO}/${context.event.text}`,
+      },
+      {
+        content_type: 'text',
+        title: `Nothing`,
+        payload: QUICK_REPLY.NOTHING,
+      },
+    ],
+  });
+};
+
+const handleInputNewTodo = async (context) => {
+  await context.sendText('Pick an action', {
+    quick_replies: [
+      {
+        content_type: 'text',
+        title: `Add as todo`,
+        payload: `${QUICK_REPLY.ADD_TODO}/${context.event.text}`,
+      },
+      {
+        content_type: 'text',
+        title: `Nothing`,
+        payload: QUICK_REPLY.NOTHING,
+      },
+    ],
+  });
+};
+
+const handleShortCutAddTodo = async (context, todoTitle) => {
+  if (context.state.todos.findIndex(({ title }) => title === todoTitle) !== -1) {
+    context.setState({
+      isWaitingUserInput: false,
+      userInput: null,
+    });
+    await context.sendText(`Todo ${todoTitle} already exists`);
+  } else if (context.state.todos.length >= 10) {
+    await context.sendText(`Sorry. You can only have 10 todos in your list.`);
+  } else {
+    context.setState({
+      todos: context.state.todos.concat({ title: todoTitle }),
+    });
+    await context.sendText(`Add todo: ${todoTitle}.`);
+    await sendQuickReplyAfterAddingTodo(context, todoTitle);
+  }
+};
+
+const handleShortCutListTodo = async (context) => {
+  if (context.event.text.length === SHORT_CUT.LIST_TODO.length) {
+    if (context.state.todos.length === 0) {
+      await context.sendText(`There's no todo in your list :-p`);
+      return;
+    }
+    context.sendText(
+      `Your Todo:\n${constructShortCutTodoList(
+        context.state.todos
+      )}\n\nChoose the index of the todo you want to view or edit:`,
+      {
+        quick_replies: context.state.todos.map(({ title }, idx) => {
+          return {
+            content_type: 'text',
+            title: `${idx + 1}`,
+            payload: `${QUICK_REPLY.CHOOSE_TODO}/${title}`,
+          };
+        }),
+      }
+    );
+  }
+};
+
 const constructShortCutTodoList = (todos) =>
   todos.map(({ title }, idx) => `${idx + 1}. ${title}`).join('\n');
 
@@ -399,88 +484,17 @@ bot.onEvent(async (context) => {
   if (context.event.isText) {
     if (isShortCutOf(SHORT_CUT.ADD_TODO, context.event.text)) {
       const todoTitle = context.event.text.slice(3);
-      if (context.state.todos.findIndex(({ title }) => title === todoTitle) !== -1) {
-        context.setState({
-          isWaitingUserInput: false,
-          userInput: null,
-        });
-        await context.sendText(`Todo ${todoTitle} already exists`);
-      } else if (context.state.todos.length >= 10) {
-        await context.sendText(`Sorry. You can only have 10 todos in your list.`);
-      } else {
-        context.setState({
-          todos: context.state.todos.concat({ title: todoTitle }),
-        });
-        await context.sendText(`Add todo: ${todoTitle}.`);
-        await sendQuickReplyAfterAddingTodo(context, todoTitle);
-      }
+      await handleShortCutAddTodo(context, todoTitle);
     } else if (isShortCutOf(SHORT_CUT.LIST_TODO, context.event.text)) {
-      if (context.event.text.length === SHORT_CUT.LIST_TODO.length) {
-        if (context.state.todos.length === 0) {
-          await context.sendText(`There's no todo in your list :-p`);
-          return;
-        }
-        context.sendText(
-          `Your Todo:\n${constructShortCutTodoList(
-            context.state.todos
-          )}\n\nChoose the index of the todo you want to view or edit:`,
-          {
-            quick_replies: context.state.todos.map(({ title }, idx) => {
-              return {
-                content_type: 'text',
-                title: `${idx + 1}`,
-                payload: `${QUICK_REPLY.CHOOSE_TODO}/${title}`,
-              };
-            }),
-          }
-        );
-      }
-    } else if (isShortCutOf(SHORT_CUT.HELP, context.event.text)) {
-      if (context.event.text.length === SHORT_CUT.HELP.length) {
-        await context.sendText(helpText);
-      }
+      await handleShortCutListTodo(context);
+    } else if (context.event.text === SHORT_CUT.HELP) {
+      await context.sendText(helpText);
     } else {
       const targetIdx = context.state.todos.findIndex(({ title }) => title === context.event.text);
       if (targetIdx !== -1) {
-        await context.sendText(`Todo "${context.event.text}" exists, you want to:`, {
-          quick_replies: [
-            {
-              content_type: 'text',
-              title: `View todo`,
-              payload: `${QUICK_REPLY.VIEW_TODO}/${context.event.text}`,
-            },
-            {
-              content_type: 'text',
-              title: `Edit todo`,
-              payload: `${QUICK_REPLY.EDIT_TODO}/${context.event.text}`,
-            },
-            {
-              content_type: 'text',
-              title: `Delete todo`,
-              payload: `${QUICK_REPLY.DELETE_TODO}/${context.event.text}`,
-            },
-            {
-              content_type: 'text',
-              title: `Nothing`,
-              payload: QUICK_REPLY.NOTHING,
-            },
-          ],
-        });
+        await handleInputExistTodo(context);
       } else {
-        await context.sendText('Pick an action', {
-          quick_replies: [
-            {
-              content_type: 'text',
-              title: `Add as todo`,
-              payload: `${QUICK_REPLY.ADD_TODO}/${context.event.text}`,
-            },
-            {
-              content_type: 'text',
-              title: `Nothing`,
-              payload: QUICK_REPLY.NOTHING,
-            },
-          ],
-        });
+        await handleInputNewTodo(context);
       }
     }
     return;
