@@ -223,7 +223,7 @@ bot.onEvent(async (context) => {
   console.log(user);
   if (context.event.payload === 'GET_STARTED') {
     await context.sendText(helpText);
-    await context.sendText("Let's add your first todo by simply entering a todo item!");
+    await context.sendText("Let's add your first todo by simply entering a name of a todo item!");
   } else if (context.state.isWaitingUserInput && context.event.isText) {
     switch (context.state.userInput.type) {
       case INPUT_TYPE.EDIT_TODO:
