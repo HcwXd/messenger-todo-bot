@@ -311,11 +311,15 @@ bot.onEvent(async (context) => {
         await context.sendText(editTodoHint);
         break;
       case POSTBACK_TITLE.ADD_TODO:
-        context.setState({
-          userInput: { type: INPUT_TYPE.ADD_TODO },
-          isWaitingUserInput: true,
-        });
-        await context.sendText(`Enter a title for this todo:`);
+        if (context.state.todos.length >= 10) {
+          await context.sendText(`Sorry. You can only have 10 todos in your list.`);
+        } else {
+          context.setState({
+            userInput: { type: INPUT_TYPE.ADD_TODO },
+            isWaitingUserInput: true,
+          });
+          await context.sendText(`Enter a title for this todo:`);
+        }
         break;
       case POSTBACK_TITLE.DELETE_TODO:
         const targetTodo = context.event.postback.payload;
@@ -354,6 +358,8 @@ bot.onEvent(async (context) => {
           userInput: null,
         });
         await context.sendText(`Todo ${todoTitle} already exists`);
+      } else if (context.state.todos.length >= 10) {
+        await context.sendText(`Sorry. You can only have 10 todos in your list.`);
       } else {
         context.setState({
           todos: context.state.todos.concat({ title: todoTitle }),
@@ -399,11 +405,11 @@ bot.onEvent(async (context) => {
           userInput: null,
         });
         await context.sendText(`Todo ${todoTitle} already exists`);
+      } else if (context.state.todos.length >= 10) {
+        await context.sendText(`Sorry. You can only have 10 todos in your list.`);
       } else {
         context.setState({
           todos: context.state.todos.concat({ title: todoTitle }),
-          isWaitingUserInput: false,
-          userInput: null,
         });
         await context.sendText(`Add todo: ${todoTitle}.`);
         await sendQuickReplyAfterAddingTodo(context, todoTitle);
