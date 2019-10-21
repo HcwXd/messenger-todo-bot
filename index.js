@@ -97,7 +97,7 @@ const deleteTodo = async (context, targetTodo) => {
 };
 
 const updateTargetTodo = async (context, targetIdx) => {
-  const updatedTodo = dCopy(context.state.todos[targetIdx]);
+  const updatedTodo = context.state.todos[targetIdx];
   const editRawData = context.event.text;
   const editRawArray = editRawData.split('\n');
 
