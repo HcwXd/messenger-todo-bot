@@ -315,6 +315,35 @@ const handleInputSetDailyReminder = async (context, dailyReminder) => {
   }
 };
 
+const handleQuickReplyAddTodo = async (context, todoTitle) => {
+  if (context.state.todos.findIndex(({ title }) => title === todoTitle) !== -1) {
+    context.setState({
+      isWaitingUserInput: false,
+      userInput: null,
+    });
+    await context.sendText(`Todo ${todoTitle} already exists`);
+  } else if (context.state.todos.length >= 10) {
+    await context.sendText(`Sorry. You can only have 10 todos in your list.`);
+  } else {
+    context.setState({
+      todos: context.state.todos.concat({ title: todoTitle }),
+      isWaitingUserInput: false,
+      userInput: null,
+    });
+    await context.sendText(
+      `Add todo: ${todoTitle}!\n\nTo add a todo faster, you can simply enter "/a something todo".\nFor example:\n/a ${todoTitle}`
+    );
+    await sendQuickReplyAfterAddingTodo(context, todoTitle);
+  }
+};
+
+const handleQuickReplyViewTodo = async (context, todoTitle) => {
+  const { title, reminder, dueDate, note } = context.state.todos.find(
+    ({ title }) => title === todoTitle
+  );
+  await context.sendText(`# ${title}\n${constructTodoSubtitle({ reminder, dueDate, note })}`);
+};
+
 const constructShortCutTodoList = (todos) =>
   todos.map(({ title }, idx) => `${idx + 1}. ${title}`).join('\n');
 
@@ -400,6 +429,15 @@ bot.onEvent(async (context) => {
           await context.sendText(`Enter a title for this todo:`);
         }
         break;
+      case POSTBACK_TITLE.SET_DAILY_REMINDER:
+        await context.sendText(
+          `Enter a time in the following format: HH:mm\nFor example:\n13:00\nThis will set a daily reminder that will send a message at certain time everyday to remind you all the todos you have.`
+        );
+        context.setState({
+          userInput: { type: INPUT_TYPE.SET_DAILY_REMINDER },
+          isWaitingUserInput: true,
+        });
+        break;
       case POSTBACK_TITLE.DELETE_TODO:
         const targetTodo = context.event.postback.payload;
         await deleteTodo(context, targetTodo);
@@ -409,15 +447,6 @@ bot.onEvent(async (context) => {
         break;
       case POSTBACK_TITLE.SETTINGS:
         await listSettings(context);
-        break;
-      case POSTBACK_TITLE.SET_DAILY_REMINDER:
-        await context.sendText(
-          `Enter a time in the following format: HH:mm\nFor example:\n13:00\nThis will set a daily reminder that will send a message at certain time everyday to remind you all the todos you have.`
-        );
-        context.setState({
-          userInput: { type: INPUT_TYPE.SET_DAILY_REMINDER },
-          isWaitingUserInput: true,
-        });
         break;
       default:
         await context.sendText(`Hello :)`);
@@ -431,39 +460,18 @@ bot.onEvent(async (context) => {
     const { payload } = context.event.quickReply;
     if (isQuickReplyOf(QUICK_REPLY.ADD_TODO, payload)) {
       const todoTitle = payload.slice(QUICK_REPLY.ADD_TODO.length + 1);
-      if (context.state.todos.findIndex(({ title }) => title === todoTitle) !== -1) {
-        context.setState({
-          isWaitingUserInput: false,
-          userInput: null,
-        });
-        await context.sendText(`Todo ${todoTitle} already exists`);
-      } else if (context.state.todos.length >= 10) {
-        await context.sendText(`Sorry. You can only have 10 todos in your list.`);
-      } else {
-        context.setState({
-          todos: context.state.todos.concat({ title: todoTitle }),
-          isWaitingUserInput: false,
-          userInput: null,
-        });
-        await context.sendText(
-          `Add todo: ${todoTitle}!\n\nTo add a todo faster, you can simply enter "/a something todo".\nFor example:\n/a ${todoTitle}`
-        );
-        await sendQuickReplyAfterAddingTodo(context, todoTitle);
-      }
+      await handleQuickReplyAddTodo(context, todoTitle);
     } else if (isQuickReplyOf(QUICK_REPLY.VIEW_TODO, payload)) {
       const todoTitle = payload.slice(QUICK_REPLY.VIEW_TODO.length + 1);
-      const { title, reminder, dueDate, note } = context.state.todos.find(
-        ({ title }) => title === todoTitle
-      );
-      await context.sendText(`# ${title}\n${constructTodoSubtitle({ reminder, dueDate, note })}`);
+      await handleQuickReplyViewTodo(context, todoTitle);
     } else if (isQuickReplyOf(QUICK_REPLY.EDIT_TODO, payload)) {
       const todoTitle = payload.slice(QUICK_REPLY.EDIT_TODO.length + 1);
+      await context.sendText(editTodoHint);
       // TODO: Should use webview instead for more complicated flow
       context.setState({
         userInput: { type: INPUT_TYPE.EDIT_TODO, payload: todoTitle },
         isWaitingUserInput: true,
       });
-      await context.sendText(editTodoHint);
     } else if (isQuickReplyOf(QUICK_REPLY.DELETE_TODO, payload)) {
       const todoTitle = payload.slice(QUICK_REPLY.DELETE_TODO.length + 1);
       await deleteTodo(context, todoTitle);
