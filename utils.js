@@ -50,7 +50,7 @@ const getTimestampFromReminder = (reminder) => {
   const [hour, minute] = time.split(':');
   if (isNaN(hour) || isNaN(minute)) return false;
 
-  return new Date(year, month - 1, day, hour, minute);
+  return new Date(year, month - 1, day, hour - 8, minute);
 };
 const renderDueDate = (dueDate) => {
   const year = new Date(dueDate).getFullYear();
@@ -63,12 +63,14 @@ const renderDueDate = (dueDate) => {
 };
 
 const renderReminder = (reminder) => {
-  const year = new Date(reminder).getFullYear();
-  const month = paddingLeft(new Date(reminder).getMonth() + 1);
-  const date = paddingLeft(new Date(reminder).getDate());
-  const day = DAY_OF_WEEK[new Date(reminder).getDay()];
-  const hour = paddingLeft(new Date(reminder).getHours());
-  const minute = paddingLeft(new Date(reminder).getMinutes());
+  const timeStamp = new Date(reminder);
+  timeStamp.setHours(timeStamp.getHours() + 8);
+  const year = timeStamp.getFullYear();
+  const month = paddingLeft(timeStamp.getMonth() + 1);
+  const date = paddingLeft(timeStamp.getDate());
+  const day = DAY_OF_WEEK[timeStamp.getDay()];
+  const hour = paddingLeft(timeStamp.getHours());
+  const minute = paddingLeft(timeStamp.getMinutes());
 
   return year === new Date().getFullYear()
     ? `${month}/${date} (${day}) ${hour}:${minute}`
