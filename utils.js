@@ -84,6 +84,17 @@ const isCorrectTimeFormat = (timeString) => {
   );
 };
 
+const constructTodoSubtitle = ({ reminder, dueDate, note }) => {
+  let subtitle = '';
+  subtitle += dueDate ? `Due ${renderDueDate(dueDate)}\n` : `No due date\n`;
+  subtitle += reminder ? `Remind me at ${renderReminder(reminder)}\n` : `No reminder\n`;
+  if (note) subtitle += `Note: ${note}`;
+  return subtitle;
+};
+
+const constructShortCutTodoList = (todos) =>
+  todos.map(({ title }, idx) => `${idx + 1}. ${title}`).join('\n');
+
 module.exports = {
   replaceArrayItemByIndex,
   getTimestampFromDueDate,
@@ -94,4 +105,6 @@ module.exports = {
   isQuickReplyOf,
   isShortCutOf,
   dCopy,
+  constructTodoSubtitle,
+  constructShortCutTodoList,
 };

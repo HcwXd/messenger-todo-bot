@@ -7,13 +7,13 @@ const {
   replaceArrayItemByIndex,
   getTimestampFromDueDate,
   getTimestampFromReminder,
-  renderDueDate,
-  renderReminder,
   isCorrectTimeFormat,
   isQuickReplyOf,
   isShortCutOf,
+  constructTodoSubtitle,
+  constructShortCutTodoList,
 } = require('./utils');
-const { helpText } = require('./helpText');
+const { helpText, editTodoHint } = require('./wording');
 
 const bot = new MessengerBot({
   accessToken: config.accessToken,
@@ -32,14 +32,6 @@ const sendWrongFormat = async (context, value, type) => {
   // TODO: Send different message according to different types
   console.log(`sendWrongFormat ${type}:${value}`);
   await context.sendText(`Wrong format: ${value}`);
-};
-
-const constructTodoSubtitle = ({ reminder, dueDate, note }) => {
-  let subtitle = '';
-  subtitle += dueDate ? `Due ${renderDueDate(dueDate)}\n` : `No due date\n`;
-  subtitle += reminder ? `Remind me at ${renderReminder(reminder)}\n` : `No reminder\n`;
-  if (note) subtitle += `Note: ${note}`;
-  return subtitle;
 };
 
 const listTodos = async (context) => {
@@ -343,35 +335,6 @@ const handleQuickReplyViewTodo = async (context, todoTitle) => {
   );
   await context.sendText(`# ${title}\n${constructTodoSubtitle({ reminder, dueDate, note })}`);
 };
-
-const constructShortCutTodoList = (todos) =>
-  todos.map(({ title }, idx) => `${idx + 1}. ${title}`).join('\n');
-
-const editTodoHint = `
-To edit the todo title, enter in the following format:
-T Some New Title
-
-To edit the due date, enter in the following format:
-D YYYY/MM/DD
-
-To edit the reminder, enter in following format:
-R YYYY/MM/DD HH:mm
-
-To edit the notes, enter in following format:
-N Some notes here
-
-For example:
-T Call Jack and Bob
-D 2019/12/02
-R 2019/12/01 13:00
-N Remember to call Jack first
-
-If you only want to edit certain fields, you can enter those in any order.
-For example:
-R 2020/01/01 13:00
-D 2020/01/01
-
-If you don't want to edit anything, enter "cancel"`;
 
 bot.onEvent(async (context) => {
   const user = await context.getUserProfile();
