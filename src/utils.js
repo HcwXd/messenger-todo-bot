@@ -1,4 +1,5 @@
 const { DAY_OF_WEEK } = require('./constant');
+const moment = require('moment');
 
 const paddingLeft = value => {
   return `${value < 10 ? '0' : ''}${value}`;
@@ -11,24 +12,46 @@ const replaceArrayItemByIndex = (array, idx, newItem) => {
 };
 
 const getTimestampFromDueDate = dueDate => {
-  if (dueDate.length !== 10) return false;
-  if (dueDate.split('/').length !== 3) return false;
-  const [year, month, day] = dueDate.split('/');
-  if (isNaN(year) || isNaN(month) || isNaN(day)) return false;
+  let year;
+  let month;
+  let day;
+  if (/(today)|(t)|(tmr)|(r)/i.test(dueDate)) {
+    year = new Date().getFullYear();
+    month = new Date().getMonth();
+    day = new Date().getDate();
+    if (/(tmr)|(r)/i.test(dueDate)) day += 1;
+  } else if (moment(dueDate, 'YYYY/M/D', true).isValid()) {
+    [year, month, day] = dueDate.split('/');
+  } else {
+    return false;
+  }
   return new Date(year, month - 1, day);
 };
 
 const getTimestampFromReminder = reminder => {
-  if (reminder.length !== 16 || reminder.split(' ').length !== 2) return false;
+  if (reminder.split(' ').length !== 2) return false;
   const [date, time] = reminder.split(' ');
+  let year;
+  let month;
+  let day;
+  let hour;
+  let minute;
+  if (/(today)|(t)|(tmr)|(r)/i.test(date)) {
+    year = new Date().getFullYear();
+    month = new Date().getMonth();
+    day = new Date().getDate();
+    if (/(tmr)|(r)/i.test(date)) day += 1;
+  } else if (moment(date, 'YYYY/M/D', true).isValid()) {
+    [year, month, day] = date.split('/');
+  } else {
+    return false;
+  }
 
-  if (date.split('/').length !== 3) return false;
-  const [year, month, day] = date.split('/');
-  if (isNaN(year) || isNaN(month) || isNaN(day)) return false;
-
-  if (time.split(':').length !== 2) return false;
-  const [hour, minute] = time.split(':');
-  if (isNaN(hour) || isNaN(minute)) return false;
+  if (moment(time, 'H:m', true).isValid()) {
+    [hour, minute] = time.split(':');
+  } else {
+    return false;
+  }
 
   return new Date(year, month - 1, day, hour - 8, minute);
 };

@@ -453,7 +453,8 @@ module.exports = async function App(context) {
     });
   }
   const user = await context.getUserProfile();
-  console.log(user);
+  console.log(`Get message from: ${user.name}`);
+
   return router([
     payload('GET_STARTED', GetStarted),
     route(

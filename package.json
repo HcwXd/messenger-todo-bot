@@ -10,7 +10,8 @@
   },
   "dependencies": {
     "bottender": "1.0.0-alpha.23",
-    "bottender-compose": "^0.14.0"
+    "bottender-compose": "^0.14.0",
+    "moment": "^2.24.0"
   },
   "devDependencies": {
     "eslint": "^6.5.1",
