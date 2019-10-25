@@ -1,4 +1,6 @@
 /* eslint-disable no-case-declarations */
+const { router, text, payload, route } = require('bottender/router');
+const { GetStarted } = require('./actions/GetStarted');
 const { POSTBACK_TITLE, INPUT_TYPE, SHORT_CUT, QUICK_REPLY } = require('./constant');
 const {
   replaceArrayItemByIndex,
@@ -319,24 +321,8 @@ const handleQuickReplyViewTodo = async (context, todoTitle) => {
   );
   await context.sendText(`# ${title}\n${constructTodoSubtitle({ reminder, dueDate, note })}`);
 };
-module.exports = async function App(context) {
-  if (!context.state.todos) {
-    context.setState({
-      todos: [],
-      isWaitingUserInput: false,
-      userInput: null,
-      prefs: { dailyReminder: null },
-    });
-  }
-  const user = await context.getUserProfile();
-  console.log(user);
-  /**  Get Started Message */
-  if (context.event.payload === 'GET_STARTED') {
-    await context.sendText(helpText);
-    await context.sendText("Let's add your first todo by simply entering a name of a todo item!");
-    return;
-  }
 
+const HandleUserInputAfterInstruction = async context => {
   /**  User input after instruction */
   if (context.state.isWaitingUserInput && context.event.isText) {
     switch (context.state.userInput.type) {
@@ -360,7 +346,9 @@ module.exports = async function App(context) {
     });
     return;
   }
+};
 
+const HandleButtonAction = async context => {
   /**  Button action */
   if (context.event.isPostback) {
     switch (context.event.postback.title) {
@@ -408,7 +396,9 @@ module.exports = async function App(context) {
     }
     return;
   }
+};
 
+const HandleQuickReply = async context => {
   /**  Quick Reply */
   if (context.event.isQuickReply) {
     const { payload } = context.event.quickReply;
@@ -435,7 +425,9 @@ module.exports = async function App(context) {
     }
     return;
   }
+};
 
+const handleUserInputInitiatedByUser = async context => {
   /**  Userinput initiated by user && Shortcut text */
   if (context.event.isText) {
     if (isShortCutOf(SHORT_CUT.ADD_TODO, context.event.text)) {
@@ -455,6 +447,31 @@ module.exports = async function App(context) {
     }
     return;
   }
+};
 
-  await context.sendText(`Hello :)`);
+module.exports = async function App(context) {
+  if (!context.state.todos) {
+    context.setState({
+      todos: [],
+      isWaitingUserInput: false,
+      userInput: null,
+      prefs: { dailyReminder: null },
+    });
+  }
+  const user = await context.getUserProfile();
+  console.log(user);
+  return router([
+    payload('GET_STARTED', GetStarted),
+    route(
+      context => context.state.isWaitingUserInput && context.event.isText,
+      HandleUserInputAfterInstruction
+    ),
+    route(context => context.event.isPostback, HandleButtonAction),
+    route(context => context.event.isQuickReply, HandleQuickReply),
+    route(context => context.event.isText, handleUserInputInitiatedByUser),
+
+    text('*', async () => {
+      await context.sendText(`Hello :)`);
+    }),
+  ]);
 };
