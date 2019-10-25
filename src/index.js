@@ -400,15 +400,17 @@ const HandleButtonAction = async context => {
 
 const HandleQuickReply = async context => {
   /**  Quick Reply */
-  if (context.event.isQuickReply) {
-    const { payload } = context.event.quickReply;
-    if (isQuickReplyOf(QUICK_REPLY.ADD_TODO, payload)) {
+  const { payload } = context.event.quickReply;
+  return router([
+    payload(new RegExp(`^${QUICK_REPLY.ADD_TODO}`), async () => {
       const todoTitle = payload.slice(QUICK_REPLY.ADD_TODO.length + 1);
       await handleQuickReplyAddTodo(context, todoTitle);
-    } else if (isQuickReplyOf(QUICK_REPLY.VIEW_TODO, payload)) {
+    }),
+    payload(new RegExp(`^${QUICK_REPLY.VIEW_TODO}`), async () => {
       const todoTitle = payload.slice(QUICK_REPLY.VIEW_TODO.length + 1);
       await handleQuickReplyViewTodo(context, todoTitle);
-    } else if (isQuickReplyOf(QUICK_REPLY.EDIT_TODO, payload)) {
+    }),
+    payload(new RegExp(`^${QUICK_REPLY.EDIT_TODO}`), async () => {
       const todoTitle = payload.slice(QUICK_REPLY.EDIT_TODO.length + 1);
       await context.sendText(editTodoHint);
       // TODO: Should use webview instead for more complicated flow
@@ -416,15 +418,12 @@ const HandleQuickReply = async context => {
         userInput: { type: INPUT_TYPE.EDIT_TODO, payload: todoTitle },
         isWaitingUserInput: true,
       });
-    } else if (isQuickReplyOf(QUICK_REPLY.DELETE_TODO, payload)) {
-      const todoTitle = payload.slice(QUICK_REPLY.DELETE_TODO.length + 1);
-      await deleteTodo(context, todoTitle);
-    } else if (isQuickReplyOf(QUICK_REPLY.CHOOSE_TODO, payload)) {
+    }),
+    payload(new RegExp(`^${QUICK_REPLY.CHOOSE_TODO}`), async () => {
       const todoTitle = payload.slice(QUICK_REPLY.CHOOSE_TODO.length + 1);
       await listSingleTodo(context, todoTitle);
-    }
-    return;
-  }
+    }),
+  ]);
 };
 
 const HandleUserInputInitiatedByUser = async context => {
