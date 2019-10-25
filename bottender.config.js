@@ -20,7 +20,12 @@ module.exports = {
       },
     },
   },
-  initialState: {},
+  initialState: {
+    todos: [],
+    isWaitingUserInput: false,
+    userInput: null,
+    prefs: { dailyReminder: null },
+  },
   channels: {
     messenger: {
       enabled: true,

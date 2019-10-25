@@ -64,5 +64,5 @@ typings/
 .env.dev
 
 # Secret
-.sessions
+.session
 screenlog.*
