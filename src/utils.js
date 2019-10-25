@@ -83,12 +83,7 @@ const renderReminder = (reminder, timezone) => {
 };
 
 const isCorrectTimeFormat = timeString => {
-  return (
-    timeString.length === 5 &&
-    timeString[2] === ':' &&
-    !isNaN(timeString.split(':')[0]) &&
-    !isNaN(timeString.split(':')[1])
-  );
+  return moment(timeString, 'H:m', true).isValid();
 };
 
 const constructTodoSubtitle = ({ reminder, dueDate, note }, timezone) => {
