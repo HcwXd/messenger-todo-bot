@@ -27,7 +27,7 @@ const listTodos = async context => {
     context.state.todos.map(({ title, reminder, dueDate, note }) => {
       return {
         title: title,
-        subtitle: constructTodoSubtitle({ reminder, dueDate, note }),
+        subtitle: constructTodoSubtitle({ reminder, dueDate, note }, context.state.prefs.timezone),
         buttons: [
           {
             type: 'postback',
@@ -54,7 +54,7 @@ const listSingleTodo = async (context, targetTodo) => {
     [
       {
         title: title,
-        subtitle: constructTodoSubtitle({ reminder, dueDate, note }),
+        subtitle: constructTodoSubtitle({ reminder, dueDate, note }, context.state.prefs.timezone),
         buttons: [
           {
             type: 'postback',
@@ -100,7 +100,8 @@ const updateTargetTodo = async (context, targetIdx) => {
         await sendWrongFormat(context, editString, INPUT_TYPE.EDIT_TODO_REMINDER);
       } else {
         const timeStamp = getTimestampFromReminder(
-          `${editString.split(' ')[1]} ${editString.split(' ')[2]}`
+          `${editString.split(' ')[1]} ${editString.split(' ')[2]}`,
+          context.state.prefs.timezone
         );
         if (!timeStamp) {
           await sendWrongFormat(context, editString, INPUT_TYPE.EDIT_TODO_REMINDER);
@@ -114,7 +115,10 @@ const updateTargetTodo = async (context, targetIdx) => {
       if (setData.length !== 2) {
         await sendWrongFormat(context, editString, INPUT_TYPE.EDIT_TODO_DUE_DATE);
       } else {
-        const timeStamp = getTimestampFromDueDate(editString.split(' ')[1]);
+        const timeStamp = getTimestampFromDueDate(
+          editString.split(' ')[1],
+          context.state.prefs.timezone
+        );
         if (!timeStamp) {
           await sendWrongFormat(context, editString, INPUT_TYPE.EDIT_TODO_DUE_DATE);
         } else {
@@ -317,7 +321,12 @@ const handleQuickReplyViewTodo = async (context, todoTitle) => {
   const { title, reminder, dueDate, note } = context.state.todos.find(
     ({ title }) => title === todoTitle
   );
-  await context.sendText(`# ${title}\n${constructTodoSubtitle({ reminder, dueDate, note })}`);
+  await context.sendText(
+    `# ${title}\n${constructTodoSubtitle(
+      { reminder, dueDate, note },
+      context.state.prefs.timezone
+    )}`
+  );
 };
 
 const HandleUserInputAfterInstruction = async context => {
@@ -449,7 +458,12 @@ module.exports = async function App(context) {
       todos: [],
       isWaitingUserInput: false,
       userInput: null,
-      prefs: { dailyReminder: null },
+      prefs: { dailyReminder: null, timezone: 8 },
+    });
+  }
+  if (!context.state.prefs.timezone) {
+    context.setState({
+      prefs: { ...context.state.prefs, timezone: 8 },
     });
   }
   const user = await context.getUserProfile();

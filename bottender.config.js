@@ -27,7 +27,7 @@ module.exports = {
     todos: [],
     isWaitingUserInput: false,
     userInput: null,
-    prefs: { dailyReminder: null },
+    prefs: { dailyReminder: null, timezone: 8 },
   },
   channels: {
     messenger: {

@@ -11,7 +11,7 @@ const replaceArrayItemByIndex = (array, idx, newItem) => {
   return ret;
 };
 
-const getTimestampFromDueDate = dueDate => {
+const getTimestampFromDueDate = (dueDate, timezone) => {
   let year;
   let month;
   let day;
@@ -25,10 +25,10 @@ const getTimestampFromDueDate = dueDate => {
   } else {
     return false;
   }
-  return new Date(year, month - 1, day);
+  return new Date(year, month - 1, day, -timezone);
 };
 
-const getTimestampFromReminder = reminder => {
+const getTimestampFromReminder = (reminder, timezone) => {
   if (reminder.split(' ').length !== 2) return false;
   const [date, time] = reminder.split(' ');
   let year;
@@ -53,11 +53,11 @@ const getTimestampFromReminder = reminder => {
     return false;
   }
 
-  return new Date(year, month - 1, day, hour - 8, minute);
+  return new Date(year, month - 1, day, hour - timezone, minute);
 };
-const renderDueDate = dueDate => {
+const renderDueDate = (dueDate, timezone) => {
   const timeStamp = new Date(dueDate);
-  timeStamp.setHours(timeStamp.getHours() + 8);
+  timeStamp.setHours(timeStamp.getHours() + timezone);
   const year = timeStamp.getFullYear();
   const month = paddingLeft(timeStamp.getMonth() + 1);
   const date = paddingLeft(timeStamp.getDate());
@@ -67,9 +67,9 @@ const renderDueDate = dueDate => {
     : `${year}/${month}/${date} (${day})`;
 };
 
-const renderReminder = reminder => {
+const renderReminder = (reminder, timezone) => {
   const timeStamp = new Date(reminder);
-  timeStamp.setHours(timeStamp.getHours() + 8);
+  timeStamp.setHours(timeStamp.getHours() + timezone);
   const year = timeStamp.getFullYear();
   const month = paddingLeft(timeStamp.getMonth() + 1);
   const date = paddingLeft(timeStamp.getDate());
@@ -91,10 +91,10 @@ const isCorrectTimeFormat = timeString => {
   );
 };
 
-const constructTodoSubtitle = ({ reminder, dueDate, note }) => {
+const constructTodoSubtitle = ({ reminder, dueDate, note }, timezone) => {
   let subtitle = '';
-  subtitle += dueDate ? `Due ${renderDueDate(dueDate)}\n` : `No due date\n`;
-  subtitle += reminder ? `Remind me at ${renderReminder(reminder)}\n` : `No reminder\n`;
+  subtitle += dueDate ? `Due ${renderDueDate(dueDate, timezone)}\n` : `No due date\n`;
+  subtitle += reminder ? `Remind me at ${renderReminder(reminder, timezone)}\n` : `No reminder\n`;
   if (note) subtitle += `Note: ${note}`;
   return subtitle;
 };
