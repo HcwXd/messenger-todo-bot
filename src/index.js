@@ -393,18 +393,18 @@ const HandleButtonAction = async context => {
 
 const HandleQuickReply = async context => {
   /**  Quick Reply */
-  const { payload } = context.event.quickReply;
+  const { quickReply } = context.event;
   return router([
     payload(new RegExp(`^${QUICK_REPLY.ADD_TODO}`), async () => {
-      const todoTitle = payload.slice(QUICK_REPLY.ADD_TODO.length + 1);
+      const todoTitle = quickReply.payload.slice(QUICK_REPLY.ADD_TODO.length + 1);
       await handleQuickReplyAddTodo(context, todoTitle);
     }),
     payload(new RegExp(`^${QUICK_REPLY.VIEW_TODO}`), async () => {
-      const todoTitle = payload.slice(QUICK_REPLY.VIEW_TODO.length + 1);
+      const todoTitle = quickReply.payload.slice(QUICK_REPLY.VIEW_TODO.length + 1);
       await handleQuickReplyViewTodo(context, todoTitle);
     }),
     payload(new RegExp(`^${QUICK_REPLY.EDIT_TODO}`), async () => {
-      const todoTitle = payload.slice(QUICK_REPLY.EDIT_TODO.length + 1);
+      const todoTitle = quickReply.payload.slice(QUICK_REPLY.EDIT_TODO.length + 1);
       await context.sendText(editTodoHint);
       // TODO: Should use webview instead for more complicated flow
       context.setState({
@@ -413,7 +413,7 @@ const HandleQuickReply = async context => {
       });
     }),
     payload(new RegExp(`^${QUICK_REPLY.CHOOSE_TODO}`), async () => {
-      const todoTitle = payload.slice(QUICK_REPLY.CHOOSE_TODO.length + 1);
+      const todoTitle = quickReply.payload.slice(QUICK_REPLY.CHOOSE_TODO.length + 1);
       await listSingleTodo(context, todoTitle);
     }),
   ]);
