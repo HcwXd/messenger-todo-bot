@@ -232,26 +232,24 @@ const handleShortCutAddTodo = async (context, todoTitle) => {
 };
 
 const handleShortCutListTodo = async context => {
-  if (context.event.text.length === SHORT_CUT.LIST_TODO.length) {
-    if (context.state.todos.length === 0) {
-      await context.sendText(`There's no todo in your list :-p`);
-      return;
-    }
-    context.sendText(
-      `Your Todo:\n${constructShortCutTodoList(
-        context.state.todos
-      )}\n\nChoose the index of the todo you want to view or edit:`,
-      {
-        quick_replies: context.state.todos.map(({ title }, idx) => {
-          return {
-            content_type: 'text',
-            title: `${idx + 1}`,
-            payload: `${QUICK_REPLY.CHOOSE_TODO}/${title}`,
-          };
-        }),
-      }
-    );
+  if (context.state.todos.length === 0) {
+    await context.sendText(`There's no todo in your list :-p`);
+    return;
   }
+  context.sendText(
+    `Your Todo:\n${constructShortCutTodoList(
+      context.state.todos
+    )}\n\nChoose the index of the todo you want to view or edit:`,
+    {
+      quick_replies: context.state.todos.map(({ title }, idx) => {
+        return {
+          content_type: 'text',
+          title: `${idx + 1}`,
+          payload: `${QUICK_REPLY.CHOOSE_TODO}/${title}`,
+        };
+      }),
+    }
+  );
 };
 
 const handleInputEditTodo = async (context, targetTodoTitle, targetIdx) => {
@@ -431,7 +429,7 @@ const HandleQuickReply = async context => {
 const HandleUserInputInitiatedByUser = async context => {
   /**  Userinput initiated by user && Shortcut text */
   return router([
-    text(/(list)/i, async () => {
+    text(/(list)|(l)/i, async () => {
       await handleShortCutListTodo(context);
     }),
     text(/(help)/i, async () => {
@@ -467,7 +465,7 @@ module.exports = async function App(context) {
     });
   }
   const user = await context.getUserProfile();
-  console.log(`Get message from: ${user.name}`);
+  if (user) console.log(`Get message from: ${user.name}`);
 
   return router([
     payload('GET_STARTED', GetStarted),
