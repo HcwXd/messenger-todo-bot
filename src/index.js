@@ -7,8 +7,6 @@ const {
   getTimestampFromDueDate,
   getTimestampFromReminder,
   isCorrectTimeFormat,
-  isQuickReplyOf,
-  isShortCutOf,
   constructTodoSubtitle,
   constructShortCutTodoList,
 } = require('./utils');
@@ -324,77 +322,72 @@ const handleQuickReplyViewTodo = async (context, todoTitle) => {
 
 const HandleUserInputAfterInstruction = async context => {
   /**  User input after instruction */
-  if (context.state.isWaitingUserInput && context.event.isText) {
-    switch (context.state.userInput.type) {
-      case INPUT_TYPE.EDIT_TODO:
-        const targetTodoTitle = context.state.userInput.payload;
-        const targetIdx = context.state.todos.findIndex(({ title }) => title === targetTodoTitle);
-        await handleInputEditTodo(context, targetTodoTitle, targetIdx);
-        break;
-      case INPUT_TYPE.ADD_TODO:
-        const todoTitle = context.event.text;
-        await handleInputAddTodo(context, todoTitle);
-        break;
-      case INPUT_TYPE.SET_DAILY_REMINDER:
-        const dailyReminder = context.event.text;
-        await handleInputSetDailyReminder(context, dailyReminder);
-        break;
-    }
-    context.setState({
-      isWaitingUserInput: false,
-      userInput: null,
-    });
-    return;
+  switch (context.state.userInput.type) {
+    case INPUT_TYPE.EDIT_TODO:
+      const targetTodoTitle = context.state.userInput.payload;
+      const targetIdx = context.state.todos.findIndex(({ title }) => title === targetTodoTitle);
+      await handleInputEditTodo(context, targetTodoTitle, targetIdx);
+      break;
+    case INPUT_TYPE.ADD_TODO:
+      const todoTitle = context.event.text;
+      await handleInputAddTodo(context, todoTitle);
+      break;
+    case INPUT_TYPE.SET_DAILY_REMINDER:
+      const dailyReminder = context.event.text;
+      await handleInputSetDailyReminder(context, dailyReminder);
+      break;
   }
+  context.setState({
+    isWaitingUserInput: false,
+    userInput: null,
+  });
+  return;
 };
 
 const HandleButtonAction = async context => {
   /**  Button action */
-  if (context.event.isPostback) {
-    switch (context.event.postback.title) {
-      case POSTBACK_TITLE.EDIT_TODO:
-        // TODO: Should use webview instead for more complicated flow
+  switch (context.event.postback.title) {
+    case POSTBACK_TITLE.EDIT_TODO:
+      // TODO: Should use webview instead for more complicated flow
+      context.setState({
+        userInput: { type: INPUT_TYPE.EDIT_TODO, payload: context.event.postback.payload },
+        isWaitingUserInput: true,
+      });
+      await context.sendText(editTodoHint);
+      break;
+    case POSTBACK_TITLE.ADD_TODO:
+      if (context.state.todos.length >= 10) {
+        await context.sendText(`Sorry. You can only have 10 todos in your list.`);
+      } else {
         context.setState({
-          userInput: { type: INPUT_TYPE.EDIT_TODO, payload: context.event.postback.payload },
+          userInput: { type: INPUT_TYPE.ADD_TODO },
           isWaitingUserInput: true,
         });
-        await context.sendText(editTodoHint);
-        break;
-      case POSTBACK_TITLE.ADD_TODO:
-        if (context.state.todos.length >= 10) {
-          await context.sendText(`Sorry. You can only have 10 todos in your list.`);
-        } else {
-          context.setState({
-            userInput: { type: INPUT_TYPE.ADD_TODO },
-            isWaitingUserInput: true,
-          });
-          await context.sendText(`Enter a title for this todo:`);
-        }
-        break;
-      case POSTBACK_TITLE.SET_DAILY_REMINDER:
-        await context.sendText(
-          `Enter a time in the following format: HH:mm\nFor example:\n13:00\nThis will set a daily reminder that will send a message at certain time everyday to remind you all the todos you have.`
-        );
-        context.setState({
-          userInput: { type: INPUT_TYPE.SET_DAILY_REMINDER },
-          isWaitingUserInput: true,
-        });
-        break;
-      case POSTBACK_TITLE.DELETE_TODO:
-        const targetTodo = context.event.postback.payload;
-        await deleteTodo(context, targetTodo);
-        break;
-      case POSTBACK_TITLE.LIST_TODO:
-        await listTodos(context);
-        break;
-      case POSTBACK_TITLE.SETTINGS:
-        await listSettings(context);
-        break;
-      default:
-        await context.sendText(`Hello :)`);
-        break;
-    }
-    return;
+        await context.sendText(`Enter a title for this todo:`);
+      }
+      break;
+    case POSTBACK_TITLE.SET_DAILY_REMINDER:
+      await context.sendText(
+        `Enter a time in the following format: HH:mm\nFor example:\n13:00\nThis will set a daily reminder that will send a message at certain time everyday to remind you all the todos you have.`
+      );
+      context.setState({
+        userInput: { type: INPUT_TYPE.SET_DAILY_REMINDER },
+        isWaitingUserInput: true,
+      });
+      break;
+    case POSTBACK_TITLE.DELETE_TODO:
+      const targetTodo = context.event.postback.payload;
+      await deleteTodo(context, targetTodo);
+      break;
+    case POSTBACK_TITLE.LIST_TODO:
+      await listTodos(context);
+      break;
+    case POSTBACK_TITLE.SETTINGS:
+      await listSettings(context);
+      break;
+    default:
+      await context.sendText(`Hello :)`);
+      break;
   }
 };
 

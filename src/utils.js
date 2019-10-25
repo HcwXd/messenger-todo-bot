@@ -4,26 +4,6 @@ const paddingLeft = value => {
   return `${value < 10 ? '0' : ''}${value}`;
 };
 
-const isQuickReplyOf = (quickReplyType, payload) => {
-  return payload.slice(0, quickReplyType.length) === quickReplyType;
-};
-
-const isShortCutOf = (shortCutType, payload) => {
-  return payload.slice(0, shortCutType.length).toUpperCase() === shortCutType.toUpperCase();
-};
-
-const dCopy = obj => {
-  if (obj === null) return null;
-  if (obj === undefined) return undefined;
-  let val;
-  const ret = Array.isArray(obj) ? [] : {};
-  Object.keys(obj).forEach(key => {
-    val = obj[key];
-    ret[key] = typeof val === 'object' ? dCopy(val) : val;
-  });
-  return ret;
-};
-
 const replaceArrayItemByIndex = (array, idx, newItem) => {
   const ret = array.slice(0);
   ret[idx] = newItem;
@@ -106,9 +86,6 @@ module.exports = {
   renderDueDate,
   renderReminder,
   isCorrectTimeFormat,
-  isQuickReplyOf,
-  isShortCutOf,
-  dCopy,
   constructTodoSubtitle,
   constructShortCutTodoList,
 };
