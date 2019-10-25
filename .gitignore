@@ -61,7 +61,7 @@ typings/
 
 # dotenv environment variables file
 .env
-.env.dev
+.env.*
 
 # Secret
 .session
