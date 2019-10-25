@@ -1,6 +1,6 @@
 const { DAY_OF_WEEK } = require('./constant');
 
-const paddingLeft = (value) => {
+const paddingLeft = value => {
   return `${value < 10 ? '0' : ''}${value}`;
 };
 
@@ -12,12 +12,12 @@ const isShortCutOf = (shortCutType, payload) => {
   return payload.slice(0, shortCutType.length).toUpperCase() === shortCutType.toUpperCase();
 };
 
-const dCopy = (obj) => {
+const dCopy = obj => {
   if (obj === null) return null;
   if (obj === undefined) return undefined;
   let val;
   const ret = Array.isArray(obj) ? [] : {};
-  Object.keys(obj).forEach((key) => {
+  Object.keys(obj).forEach(key => {
     val = obj[key];
     ret[key] = typeof val === 'object' ? dCopy(val) : val;
   });
@@ -30,7 +30,7 @@ const replaceArrayItemByIndex = (array, idx, newItem) => {
   return ret;
 };
 
-const getTimestampFromDueDate = (dueDate) => {
+const getTimestampFromDueDate = dueDate => {
   if (dueDate.length !== 10) return false;
   if (dueDate.split('/').length !== 3) return false;
   const [year, month, day] = dueDate.split('/');
@@ -38,7 +38,7 @@ const getTimestampFromDueDate = (dueDate) => {
   return new Date(year, month - 1, day);
 };
 
-const getTimestampFromReminder = (reminder) => {
+const getTimestampFromReminder = reminder => {
   if (reminder.length !== 16 || reminder.split(' ').length !== 2) return false;
   const [date, time] = reminder.split(' ');
 
@@ -52,7 +52,7 @@ const getTimestampFromReminder = (reminder) => {
 
   return new Date(year, month - 1, day, hour - 8, minute);
 };
-const renderDueDate = (dueDate) => {
+const renderDueDate = dueDate => {
   const timeStamp = new Date(dueDate);
   timeStamp.setHours(timeStamp.getHours() + 8);
   const year = timeStamp.getFullYear();
@@ -64,7 +64,7 @@ const renderDueDate = (dueDate) => {
     : `${year}/${month}/${date} (${day})`;
 };
 
-const renderReminder = (reminder) => {
+const renderReminder = reminder => {
   const timeStamp = new Date(reminder);
   timeStamp.setHours(timeStamp.getHours() + 8);
   const year = timeStamp.getFullYear();
@@ -79,7 +79,7 @@ const renderReminder = (reminder) => {
     : `${year}/${month}/${date} (${day}) ${hour}:${minute}`;
 };
 
-const isCorrectTimeFormat = (timeString) => {
+const isCorrectTimeFormat = timeString => {
   return (
     timeString.length === 5 &&
     timeString[2] === ':' &&
@@ -96,7 +96,7 @@ const constructTodoSubtitle = ({ reminder, dueDate, note }) => {
   return subtitle;
 };
 
-const constructShortCutTodoList = (todos) =>
+const constructShortCutTodoList = todos =>
   todos.map(({ title }, idx) => `${idx + 1}. ${title}`).join('\n');
 
 module.exports = {

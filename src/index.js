@@ -1,3 +1,4 @@
+/* eslint-disable no-case-declarations */
 const { POSTBACK_TITLE, INPUT_TYPE, SHORT_CUT, QUICK_REPLY } = require('./constant');
 const {
   replaceArrayItemByIndex,
@@ -17,7 +18,7 @@ const sendWrongFormat = async (context, value, type) => {
   await context.sendText(`Wrong format: ${value}`);
 };
 
-const listTodos = async (context) => {
+const listTodos = async context => {
   if (context.state.todos.length === 0) {
     await context.sendText(`There's no todo in your list :-p`);
     return;
@@ -84,7 +85,7 @@ const updateTargetTodo = async (context, targetIdx) => {
   const editRawData = context.event.text;
   const editRawArray = editRawData.split('\n');
 
-  editRawArray.forEach(async (editString) => {
+  editRawArray.forEach(async editString => {
     if (editString[0] === 'T') {
       const todoTitle = editString.slice(2);
       if (context.state.todos.findIndex(({ title }) => title === todoTitle) !== -1) {
@@ -128,7 +129,7 @@ const updateTargetTodo = async (context, targetIdx) => {
   return updatedTodo;
 };
 
-const listSettings = async (context) => {
+const listSettings = async context => {
   await context.sendGenericTemplate(
     [
       {
@@ -164,7 +165,7 @@ const sendQuickReplyAfterAddingTodo = async (context, todoTitle) => {
   );
 };
 
-const handleInputExistTodo = async (context) => {
+const handleInputExistTodo = async context => {
   await context.sendText(`Todo "${context.event.text}" exists, you want to:`, {
     quick_replies: [
       {
@@ -191,7 +192,7 @@ const handleInputExistTodo = async (context) => {
   });
 };
 
-const handleInputNewTodo = async (context) => {
+const handleInputNewTodo = async context => {
   await context.sendText('Pick an action', {
     quick_replies: [
       {
@@ -226,7 +227,7 @@ const handleShortCutAddTodo = async (context, todoTitle) => {
   }
 };
 
-const handleShortCutListTodo = async (context) => {
+const handleShortCutListTodo = async context => {
   if (context.event.text.length === SHORT_CUT.LIST_TODO.length) {
     if (context.state.todos.length === 0) {
       await context.sendText(`There's no todo in your list :-p`);
