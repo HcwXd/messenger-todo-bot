@@ -1,5 +1,5 @@
 /* eslint-disable no-case-declarations */
-const { router, text, payload, route } = require('bottender/router');
+const { router, text, payload, route, withProps } = require('bottender/router');
 const { GetStarted } = require('./actions/GetStarted');
 const { POSTBACK_TITLE, INPUT_TYPE, SHORT_CUT, QUICK_REPLY } = require('./constant');
 const {
@@ -427,26 +427,28 @@ const HandleQuickReply = async context => {
   }
 };
 
-const handleUserInputInitiatedByUser = async context => {
+const HandleUserInputInitiatedByUser = async context => {
   /**  Userinput initiated by user && Shortcut text */
-  if (context.event.isText) {
-    if (isShortCutOf(SHORT_CUT.ADD_TODO, context.event.text)) {
+  return router([
+    text(/(list)/i, async () => {
+      await handleShortCutListTodo(context);
+    }),
+    text(/(help)/i, async () => {
+      await context.sendText(helpText);
+    }),
+    text(/^\/a/, async () => {
       const todoTitle = context.event.text.slice(3);
       await handleShortCutAddTodo(context, todoTitle);
-    } else if (isShortCutOf(SHORT_CUT.LIST_TODO, context.event.text)) {
-      await handleShortCutListTodo(context);
-    } else if (context.event.text === SHORT_CUT.HELP) {
-      await context.sendText(helpText);
-    } else {
+    }),
+    text('*', async () => {
       const targetIdx = context.state.todos.findIndex(({ title }) => title === context.event.text);
       if (targetIdx !== -1) {
         await handleInputExistTodo(context);
       } else {
         await handleInputNewTodo(context);
       }
-    }
-    return;
-  }
+    }),
+  ]);
 };
 
 module.exports = async function App(context) {
@@ -468,7 +470,7 @@ module.exports = async function App(context) {
     ),
     route(context => context.event.isPostback, HandleButtonAction),
     route(context => context.event.isQuickReply, HandleQuickReply),
-    route(context => context.event.isText, handleUserInputInitiatedByUser),
+    route(context => context.event.isText, HandleUserInputInitiatedByUser),
 
     text('*', async () => {
       await context.sendText(`Hello :)`);
