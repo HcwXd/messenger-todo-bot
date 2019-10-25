@@ -1,20 +1,21 @@
 {
-  "name": "messenger-todo-bot",
+  "name": "v1-todo-bot",
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "NODE_ENV=dev nodemon index.js",
-    "prod": "nodemon index.js",
-    "reminder": "nodemon reminder.js",
-    "start": "node index.js"
+    "dev": "bottender dev",
+    "lint": "eslint .",
+    "start": "bottender start",
+    "test": "jest"
   },
   "dependencies": {
-    "axios": "^0.19.0",
-    "bottender": "0.15.17",
-    "dotenv": "^8.1.0",
-    "ls": "^0.2.1"
+    "bottender": "1.0.0-alpha.23"
   },
   "devDependencies": {
-    "nodemon": "^1.19.3"
+    "eslint": "^6.5.1",
+    "eslint-config-prettier": "^6.4.0",
+    "eslint-plugin-prettier": "^3.1.1",
+    "jest": "^24.9.0",
+    "prettier": "^1.18.2"
   }
 }
