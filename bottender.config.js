@@ -1,3 +1,6 @@
+const { POSTBACK_TITLE } = require('./src/constant');
+const { helpText } = require('./src/wording');
+
 module.exports = {
   session: {
     driver: 'file',
@@ -35,6 +38,40 @@ module.exports = {
       appId: process.env.MESSENGER_APP_ID,
       appSecret: process.env.MESSENGER_APP_SECRET,
       verifyToken: process.env.MESSENGER_VERIFY_TOKEN,
+      profile: {
+        get_started: {
+          payload: 'GET_STARTED',
+        },
+        greeting: [
+          {
+            locale: 'default',
+            text: helpText,
+          },
+        ],
+        persistent_menu: [
+          {
+            locale: 'default',
+            composer_input_disabled: false,
+            call_to_actions: [
+              {
+                type: 'postback',
+                title: POSTBACK_TITLE.ADD_TODO,
+                payload: POSTBACK_TITLE.ADD_TODO,
+              },
+              {
+                type: 'postback',
+                title: POSTBACK_TITLE.LIST_TODO,
+                payload: POSTBACK_TITLE.LIST_TODO,
+              },
+              {
+                type: 'postback',
+                title: POSTBACK_TITLE.SETTINGS,
+                payload: POSTBACK_TITLE.SETTINGS,
+              },
+            ],
+          },
+        ],
+      },
     },
     line: {
       enabled: false,
