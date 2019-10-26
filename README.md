@@ -58,9 +58,7 @@ It works like a personal assistant that you can tell when should it remind you a
 - [x] Use text list with quick reply instead of gallery for listing todo
 - [x] Introduction section
 - [x] Help section
+- [x] Handle Timezone offset
+- [x] More time validation
 - [ ] Send different message according to different types of invalid input
 - [ ] Use webview instead for more complicated flow for todo edition
-- [ ] Handle Timezone offset
-- [ ] Set smart reminder according to due date
-- [ ] Let user adjust the order of todos
-- [ ] More time validation
