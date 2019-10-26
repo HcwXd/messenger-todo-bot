@@ -21,24 +21,36 @@ To edit the todo title, enter in the following format:
 T Some New Title
 
 To edit the due date, enter in the following format:
-D YYYY/MM/DD
+D YYYY/M/D
 
 To edit the reminder, enter in following format:
-R YYYY/MM/DD HH:mm
+R YYYY/M/D H:m
 
 To edit the notes, enter in following format:
 N Some notes here
 
 For example:
 T Call Jack and Bob
-D 2019/12/02
-R 2019/12/01 13:00
+D 2019/12/2
+R 2019/12/1 13:15
 N Remember to call Jack first
 
 If you only want to edit certain fields, you can enter those in any order.
 For example:
-R 2020/01/01 13:00
-D 2020/01/01
+R 2020/9/13 8:10
+D 2020/10/1
 
-If you don't want to edit anything, enter "cancel"`;
-module.exports = { helpText, editTodoHint };
+If you don't want to edit anything, enter "cancel"
+
+To see advanced edit shortcut, enter "help edit" after finishing this edition.
+`;
+
+const advanceEditTodoHint = `
+You can use number to represent the day after that number of days or the hour after that number of hours.
+For example:
+D 2
+This sets the due date to the day after tomorrow.
+R 0 3
+This sets the reminder to three hours later.
+`;
+module.exports = { helpText, editTodoHint, advanceEditTodoHint };

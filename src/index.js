@@ -12,7 +12,7 @@ const {
   constructTodoSubtitle,
   constructShortCutTodoList,
 } = require('./utils');
-const { editTodoHint } = require('./wording');
+const { editTodoHint, advanceEditTodoHint } = require('./wording');
 
 const sendWrongFormat = async (context, value, type) => {
   // TODO: Send different message according to different types
@@ -499,6 +499,9 @@ const HandleUserInputInitiatedByUser = async context => {
       await handleShortCutListTodo(context);
     }),
     text(/^(help|h)$/i, SendHelp),
+    text(/^(help edit)$/i, async () => {
+      await context.sendText(advanceEditTodoHint);
+    }),
     text(/^(settings|s)$/i, async () => {
       await listSettings(context);
     }),
