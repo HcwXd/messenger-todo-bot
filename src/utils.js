@@ -22,6 +22,10 @@ const getTimestampFromDueDate = (dueDate, timezone) => {
     if (/(tmr)|(r)/i.test(dueDate)) day += 1;
   } else if (moment(dueDate, 'YYYY/M/D', true).isValid()) {
     [year, month, day] = dueDate.split('/');
+  } else if (!isNaN(dueDate)) {
+    year = new Date().getFullYear();
+    month = new Date().getMonth() + 1;
+    day = new Date().getDate() + Number(dueDate);
   } else {
     return false;
   }
@@ -43,12 +47,19 @@ const getTimestampFromReminder = (reminder, timezone) => {
     if (/(tmr)|(r)/i.test(date)) day += 1;
   } else if (moment(date, 'YYYY/M/D', true).isValid()) {
     [year, month, day] = date.split('/');
+  } else if (!isNaN(date)) {
+    year = new Date().getFullYear();
+    month = new Date().getMonth() + 1;
+    day = new Date().getDate() + Number(date);
   } else {
     return false;
   }
 
   if (moment(time, 'H:m', true).isValid()) {
     [hour, minute] = time.split(':');
+  } else if (!isNaN(time)) {
+    hour = new Date().getHours() + Number(time);
+    minute = new Date().getMinutes();
   } else {
     return false;
   }
