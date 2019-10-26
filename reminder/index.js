@@ -2,7 +2,6 @@ require('dotenv').config();
 const fs = require('fs');
 const ls = require('ls');
 const axios = require('axios');
-const { renderDueDate } = require('../src/utils');
 
 const sendUrl = `https://graph.facebook.com/v4.0/me/messages?access_token=${process.env.MESSENGER_ACCESS_TOKEN}`;
 const checkReminderInterval = 60000;
@@ -24,8 +23,8 @@ const constuctDailyReminderMessage = todos => {
   return { text };
 };
 
-const constuctTodoReminderMessage = ({ title, dueDate }) => {
-  const text = `# Reminder\n${title}\n${dueDate ? `- Due ${renderDueDate(dueDate)}` : ''}`;
+const constuctTodoReminderMessage = ({ title }) => {
+  const text = `# Reminder\n${title}`;
   return { text };
 };
 
