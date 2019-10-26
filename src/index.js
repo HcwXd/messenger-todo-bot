@@ -1,6 +1,7 @@
 /* eslint-disable no-case-declarations */
 const { router, text, payload, route, withProps } = require('bottender/router');
-const { GetStarted } = require('./actions/GetStarted');
+const GetStarted = require('./actions/GetStarted');
+const SendHelp = require('./actions/SendHelp');
 const { POSTBACK_TITLE, INPUT_TYPE, SHORT_CUT, QUICK_REPLY } = require('./constant');
 const {
   replaceArrayItemByIndex,
@@ -429,12 +430,10 @@ const HandleQuickReply = async context => {
 const HandleUserInputInitiatedByUser = async context => {
   /**  Userinput initiated by user && Shortcut text */
   return router([
-    text(/(list)|(l)/i, async () => {
+    text(/^(list|l)$/i, async () => {
       await handleShortCutListTodo(context);
     }),
-    text(/(help)/i, async () => {
-      await context.sendText(helpText);
-    }),
+    text(/^(help)$/i, SendHelp),
     text(/^\/a/, async () => {
       const todoTitle = context.event.text.slice(3);
       await handleShortCutAddTodo(context, todoTitle);
