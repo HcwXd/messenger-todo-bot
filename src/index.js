@@ -2,6 +2,7 @@
 const { router, text, payload, route, withProps } = require('bottender/router');
 const GetStarted = require('./actions/GetStarted');
 const SendHelp = require('./actions/SendHelp');
+const Nothing = require('./actions/Nothing');
 const { POSTBACK_TITLE, INPUT_TYPE, QUICK_REPLY } = require('./constant');
 const {
   replaceArrayItemByIndex,
@@ -481,6 +482,7 @@ const HandleQuickReply = async context => {
       const todoTitle = quickReply.payload.slice(QUICK_REPLY.CHOOSE_TODO.length + 1);
       await listSingleTodo(context, todoTitle);
     }),
+    payload(QUICK_REPLY.NOTHING, Nothing),
   ]);
 };
 
