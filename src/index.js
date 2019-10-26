@@ -150,7 +150,21 @@ const listSettings = async context => {
           },
         ],
       },
+      {
+        title: 'Set Timezone',
+        subtitle: context.state.prefs.timezone
+          ? `Your timezone now set at ${context.state.prefs.timezone}.`
+          : `You haven't set your timezone yet.`,
+        buttons: [
+          {
+            type: 'postback',
+            title: POSTBACK_TITLE.SET_TIME_ZONE,
+            payload: POSTBACK_TITLE.SET_TIME_ZONE,
+          },
+        ],
+      },
     ],
+
     { image_aspect_ratio: 'square' }
   );
 };
@@ -294,6 +308,17 @@ const handleInputSetDailyReminder = async (context, dailyReminder) => {
   }
 };
 
+const handleInputSetTimezone = async (context, timezone) => {
+  if (-12 <= timezone <= 14) {
+    context.setState({
+      prefs: { ...context.state.prefs, timezone },
+    });
+    await context.sendText(`Set your timezone: ${timezone}`);
+  } else {
+    await sendWrongFormat(context, timezone, INPUT_TYPE.SET_TIME_ZONE);
+  }
+};
+
 const handleQuickReplyAddTodo = async (context, todoTitle) => {
   if (context.state.todos.findIndex(({ title }) => title === todoTitle) !== -1) {
     context.setState({
@@ -344,6 +369,10 @@ const HandleUserInputAfterInstruction = async context => {
       const dailyReminder = context.event.text;
       await handleInputSetDailyReminder(context, dailyReminder);
       break;
+    case INPUT_TYPE.SET_TIME_ZONE:
+      const timezone = context.event.text;
+      await handleInputSetTimezone(context, timezone);
+      break;
   }
   context.setState({
     isWaitingUserInput: false,
@@ -380,6 +409,15 @@ const HandleButtonAction = async context => {
       );
       context.setState({
         userInput: { type: INPUT_TYPE.SET_DAILY_REMINDER },
+        isWaitingUserInput: true,
+      });
+      break;
+    case POSTBACK_TITLE.SET_TIME_ZONE:
+      await context.sendText(
+        `Enter your timezone offset.\nFor example, if you live in Taiwan, enter "8".\nIf you live in New York, enter "-4".\nYou can find your timezone at https://www.timeanddate.com/time/map/`
+      );
+      context.setState({
+        userInput: { type: INPUT_TYPE.SET_TIME_ZONE },
         isWaitingUserInput: true,
       });
       break;

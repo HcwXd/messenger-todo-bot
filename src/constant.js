@@ -6,6 +6,7 @@ module.exports = {
     EDIT_TODO: `Edit`,
     SETTINGS: 'Settings',
     SET_DAILY_REMINDER: `Set Reminder`,
+    SET_TIME_ZONE: `Set Timezone`,
   },
   INPUT_TYPE: {
     ADD_TODO: `input/addTodo`,
@@ -14,6 +15,7 @@ module.exports = {
     EDIT_TODO_DUE_DATE: `input/editTodo/dueDate`,
     EDIT_TODO_REMINDER: `input/editTodo/reminder`,
     SET_DAILY_REMINDER: `input/setDailyReminder`,
+    SET_TIME_ZONE: `input/setTimezone`,
   },
   SHORT_CUT: {
     ADD_TODO: '/a ',
