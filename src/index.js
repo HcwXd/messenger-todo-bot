@@ -2,7 +2,7 @@
 const { router, text, payload, route, withProps } = require('bottender/router');
 const GetStarted = require('./actions/GetStarted');
 const SendHelp = require('./actions/SendHelp');
-const { POSTBACK_TITLE, INPUT_TYPE, SHORT_CUT, QUICK_REPLY } = require('./constant');
+const { POSTBACK_TITLE, INPUT_TYPE, QUICK_REPLY } = require('./constant');
 const {
   replaceArrayItemByIndex,
   getTimestampFromDueDate,
@@ -11,7 +11,7 @@ const {
   constructTodoSubtitle,
   constructShortCutTodoList,
 } = require('./utils');
-const { helpText, editTodoHint } = require('./wording');
+const { editTodoHint } = require('./wording');
 
 const sendWrongFormat = async (context, value, type) => {
   // TODO: Send different message according to different types
@@ -433,7 +433,10 @@ const HandleUserInputInitiatedByUser = async context => {
     text(/^(list|l)$/i, async () => {
       await handleShortCutListTodo(context);
     }),
-    text(/^(help)$/i, SendHelp),
+    text(/^(help|h)$/i, SendHelp),
+    text(/^(settings|s)$/i, async () => {
+      await listSettings(context);
+    }),
     text(/^\/a/, async () => {
       const todoTitle = context.event.text.slice(3);
       await handleShortCutAddTodo(context, todoTitle);
