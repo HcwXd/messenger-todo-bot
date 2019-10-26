@@ -287,7 +287,13 @@ const handleInputEditTodo = async (context, targetTodoTitle, targetIdx) => {
       await context.sendText(`Cancel update ${targetTodoTitle}`);
     } else {
       const editTodo = await updateTargetTodo(context, targetIdx);
-      await context.sendText(`Update ${targetTodoTitle}`);
+      const { reminder, dueDate, note } = editTodo;
+      await context.sendText(
+        `Update ${targetTodoTitle}\n${constructTodoSubtitle(
+          { reminder, dueDate, note },
+          context.state.prefs.timezone
+        )}`
+      );
       context.setState({
         todos: replaceArrayItemByIndex(context.state.todos, targetIdx, editTodo),
       });
@@ -385,7 +391,7 @@ const HandleUserInputAfterInstruction = async context => {
       break;
     case INPUT_TYPE.SET_TIME_ZONE:
       const timezone = context.event.text;
-      await handleInputSetTimezone(context, timezone);
+      await handleInputSetTimezone(context, +timezone);
       break;
   }
   context.setState({

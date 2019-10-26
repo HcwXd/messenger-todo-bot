@@ -17,7 +17,7 @@ const getTimestampFromDueDate = (dueDate, timezone) => {
   let day;
   if (/(today)|(t)|(tmr)|(r)/i.test(dueDate)) {
     year = new Date().getFullYear();
-    month = new Date().getMonth();
+    month = new Date().getMonth() + 1;
     day = new Date().getDate();
     if (/(tmr)|(r)/i.test(dueDate)) day += 1;
   } else if (moment(dueDate, 'YYYY/M/D', true).isValid()) {
@@ -38,7 +38,7 @@ const getTimestampFromReminder = (reminder, timezone) => {
   let minute;
   if (/(today)|(t)|(tmr)|(r)/i.test(date)) {
     year = new Date().getFullYear();
-    month = new Date().getMonth();
+    month = new Date().getMonth() + 1;
     day = new Date().getDate();
     if (/(tmr)|(r)/i.test(date)) day += 1;
   } else if (moment(date, 'YYYY/M/D', true).isValid()) {
