@@ -1,4 +1,4 @@
-const { DAY_OF_WEEK } = require('./constant');
+const { DAY_OF_WEEK, SERVER_TIMEZONE_OFFSET } = require('./constant');
 const moment = require('moment');
 
 const paddingLeft = value => {
@@ -29,7 +29,7 @@ const getTimestampFromDueDate = (dueDate, timezone) => {
   } else {
     return false;
   }
-  return new Date(year, month - 1, day, -timezone);
+  return new Date(year, month - 1, day, -SERVER_TIMEZONE_OFFSET - timezone);
 };
 
 const getTimestampFromReminder = (reminder, timezone) => {
@@ -64,11 +64,20 @@ const getTimestampFromReminder = (reminder, timezone) => {
     return false;
   }
 
-  return new Date(year, month - 1, day, hour - timezone, minute);
+  const timeStamp = new Date(
+    year,
+    month - 1,
+    day,
+    hour - timezone - SERVER_TIMEZONE_OFFSET,
+    minute
+  );
+  if (timeStamp.getTime() < new Date().getTime()) return false;
+
+  return timeStamp;
 };
 const renderDueDate = (dueDate, timezone) => {
   const timeStamp = new Date(dueDate);
-  timeStamp.setHours(timeStamp.getHours() + timezone);
+  timeStamp.setHours(timeStamp.getHours() + timezone + SERVER_TIMEZONE_OFFSET);
   const year = timeStamp.getFullYear();
   const month = paddingLeft(timeStamp.getMonth() + 1);
   const date = paddingLeft(timeStamp.getDate());
@@ -80,7 +89,7 @@ const renderDueDate = (dueDate, timezone) => {
 
 const renderReminder = (reminder, timezone) => {
   const timeStamp = new Date(reminder);
-  timeStamp.setHours(timeStamp.getHours() + timezone);
+  timeStamp.setHours(timeStamp.getHours() + timezone + SERVER_TIMEZONE_OFFSET);
   const year = timeStamp.getFullYear();
   const month = paddingLeft(timeStamp.getMonth() + 1);
   const date = paddingLeft(timeStamp.getDate());

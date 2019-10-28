@@ -36,4 +36,5 @@ module.exports = {
   REDIS_KEY: {
     TODO_QUEUE: 'todoQueue',
   },
+  SERVER_TIMEZONE_OFFSET: new Date().getTimezoneOffset() / 60,
 };
