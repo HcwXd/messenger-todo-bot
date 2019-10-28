@@ -33,4 +33,7 @@ module.exports = {
     CHOOSE_TODO: 'quickReply/chooseTodo',
   },
   DAY_OF_WEEK: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
+  REDIS_KEY: {
+    TODO_QUEUE: 'todoQueue',
+  },
 };

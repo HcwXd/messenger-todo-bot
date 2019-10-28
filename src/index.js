@@ -1,9 +1,10 @@
 /* eslint-disable no-case-declarations */
-const { router, text, payload, route, withProps } = require('bottender/router');
+const { router, text, payload, route } = require('bottender/router');
 const GetStarted = require('./actions/GetStarted');
 const SendHelp = require('./actions/SendHelp');
 const Nothing = require('./actions/Nothing');
-const { POSTBACK_TITLE, INPUT_TYPE, QUICK_REPLY } = require('./constant');
+const { redisClient } = require('./services/redis');
+const { POSTBACK_TITLE, INPUT_TYPE, QUICK_REPLY, REDIS_KEY } = require('./constant');
 const {
   replaceArrayItemByIndex,
   getTimestampFromDueDate,
@@ -11,6 +12,7 @@ const {
   isCorrectTimeFormat,
   constructTodoSubtitle,
   constructShortCutTodoList,
+  constructTodoReminderKey,
 } = require('./utils');
 const { editTodoHint, advanceEditTodoHint } = require('./wording');
 
@@ -109,6 +111,12 @@ const updateTargetTodo = async (context, targetIdx) => {
           await sendWrongFormat(context, editString, INPUT_TYPE.EDIT_TODO_REMINDER);
         } else {
           updatedTodo.reminder = timeStamp;
+          const user = await context.getUserProfile();
+          redisClient.zadd(
+            REDIS_KEY.TODO_QUEUE,
+            timeStamp.getTime(),
+            constructTodoReminderKey(user.id, updatedTodo.title)
+          );
         }
       }
     } else if (editString[0] === 'D') {

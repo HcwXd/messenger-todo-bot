@@ -108,6 +108,10 @@ const constructTodoSubtitle = ({ reminder, dueDate, note }, timezone) => {
 const constructShortCutTodoList = todos =>
   todos.map(({ title }, idx) => `${idx + 1}. ${title}`).join('\n');
 
+const constructTodoReminderKey = (userId, todoTitle) => {
+  return JSON.stringify({ id: userId, title: todoTitle });
+};
+
 module.exports = {
   replaceArrayItemByIndex,
   getTimestampFromDueDate,
@@ -117,4 +121,5 @@ module.exports = {
   isCorrectTimeFormat,
   constructTodoSubtitle,
   constructShortCutTodoList,
+  constructTodoReminderKey,
 };
