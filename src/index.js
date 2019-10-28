@@ -114,7 +114,7 @@ const updateTargetTodo = async (context, targetIdx) => {
           const user = await context.getUserProfile();
           redisClient.zadd(
             REDIS_KEY.TODO_QUEUE,
-            timeStamp.getTime(),
+            Math.floor(timeStamp.getTime() / 1000),
             constructTodoReminderKey(user.id, updatedTodo.title)
           );
         }
