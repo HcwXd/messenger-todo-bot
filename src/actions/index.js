@@ -1,10 +1,10 @@
 /* eslint-disable no-case-declarations */
 const { router, text, payload, route } = require('bottender/router');
 const GetStarted = require('./GetStarted');
-const Nothing = require('./Nothing');
 const TextRouter = require('./text');
-const DialogueRouter = require('./Dialogue');
-const { POSTBACK_TITLE, INPUT_TYPE, QUICK_REPLY } = require('../utils/constant');
+const DialogueRouter = require('./dialogue');
+const QuickReplyRouter = require('./quickReply');
+const { POSTBACK_TITLE, INPUT_TYPE } = require('../utils/constant');
 const { constructTodoSubtitle } = require('../utils/utils');
 const { editTodoHint } = require('../utils/wording');
 
@@ -32,33 +32,6 @@ const listTodos = async context => {
         ],
       };
     }),
-    { image_aspect_ratio: 'square' }
-  );
-};
-
-const listSingleTodo = async (context, targetTodo) => {
-  const { title, reminder, dueDate, note } = context.state.todos.find(
-    ({ title }) => title === targetTodo
-  );
-  await context.sendGenericTemplate(
-    [
-      {
-        title: title,
-        subtitle: constructTodoSubtitle({ reminder, dueDate, note }, context.state.prefs.timezone),
-        buttons: [
-          {
-            type: 'postback',
-            title: POSTBACK_TITLE.EDIT_TODO,
-            payload: title,
-          },
-          {
-            type: 'postback',
-            title: POSTBACK_TITLE.DELETE_TODO,
-            payload: title,
-          },
-        ],
-      },
-    ],
     { image_aspect_ratio: 'square' }
   );
 };
@@ -115,55 +88,6 @@ const listSettings = async context => {
     ],
 
     { image_aspect_ratio: 'square' }
-  );
-};
-
-const sendQuickReplyAfterAddingTodo = async (context, todoTitle) => {
-  context.sendText(
-    `You can add due date and reminder of the todo by clicking the edit button.\nOr ignore the button and add those later.`,
-    {
-      quick_replies: [
-        {
-          content_type: 'text',
-          title: `Edit`,
-          payload: `${QUICK_REPLY.EDIT_TODO}/${todoTitle}`,
-        },
-      ],
-    }
-  );
-};
-
-const handleQuickReplyAddTodo = async (context, todoTitle) => {
-  if (context.state.todos.findIndex(({ title }) => title === todoTitle) !== -1) {
-    context.setState({
-      isWaitingUserInput: false,
-      userInput: null,
-    });
-    await context.sendText(`Todo ${todoTitle} already exists`);
-  } else if (context.state.todos.length >= 10) {
-    await context.sendText(`Sorry. You can only have 10 todos in your list.`);
-  } else {
-    context.setState({
-      todos: context.state.todos.concat({ title: todoTitle }),
-      isWaitingUserInput: false,
-      userInput: null,
-    });
-    await context.sendText(
-      `Add todo: ${todoTitle}!\n\nTo add a todo faster, you can simply enter "/a something todo".\nFor example:\n/a ${todoTitle}`
-    );
-    await sendQuickReplyAfterAddingTodo(context, todoTitle);
-  }
-};
-
-const handleQuickReplyViewTodo = async (context, todoTitle) => {
-  const { title, reminder, dueDate, note } = context.state.todos.find(
-    ({ title }) => title === todoTitle
-  );
-  await context.sendText(
-    `# ${title}\n${constructTodoSubtitle(
-      { reminder, dueDate, note },
-      context.state.prefs.timezone
-    )}`
   );
 };
 
@@ -229,41 +153,12 @@ const HandleButtonAction = async context => {
   }
 };
 
-const HandleQuickReply = async context => {
-  /**  Quick Reply */
-  const { quickReply } = context.event;
-  return router([
-    payload(new RegExp(`^${QUICK_REPLY.ADD_TODO}`), async () => {
-      const todoTitle = quickReply.payload.slice(QUICK_REPLY.ADD_TODO.length + 1);
-      await handleQuickReplyAddTodo(context, todoTitle);
-    }),
-    payload(new RegExp(`^${QUICK_REPLY.VIEW_TODO}`), async () => {
-      const todoTitle = quickReply.payload.slice(QUICK_REPLY.VIEW_TODO.length + 1);
-      await handleQuickReplyViewTodo(context, todoTitle);
-    }),
-    payload(new RegExp(`^${QUICK_REPLY.EDIT_TODO}`), async () => {
-      const todoTitle = quickReply.payload.slice(QUICK_REPLY.EDIT_TODO.length + 1);
-      await context.sendText(editTodoHint);
-      // TODO: Should use webview instead for more complicated flow
-      context.setState({
-        userInput: { type: INPUT_TYPE.EDIT_TODO, payload: todoTitle },
-        isWaitingUserInput: true,
-      });
-    }),
-    payload(new RegExp(`^${QUICK_REPLY.CHOOSE_TODO}`), async () => {
-      const todoTitle = quickReply.payload.slice(QUICK_REPLY.CHOOSE_TODO.length + 1);
-      await listSingleTodo(context, todoTitle);
-    }),
-    payload(QUICK_REPLY.NOTHING, Nothing),
-  ]);
-};
-
 module.exports = async function App(context) {
   return router([
     payload('GET_STARTED', GetStarted),
     route(context => context.state.isWaitingUserInput, DialogueRouter),
     route(context => context.event.isPostback, HandleButtonAction),
-    route(context => context.event.isQuickReply, HandleQuickReply),
+    route(context => context.event.isQuickReply, QuickReplyRouter),
     route(context => context.event.isText, TextRouter),
 
     text('*', async () => {
