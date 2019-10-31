@@ -3,23 +3,10 @@ const { router, text, payload, route } = require('bottender/router');
 const GetStarted = require('./GetStarted');
 const Nothing = require('./Nothing');
 const TextRouter = require('./text');
-const { redisClient } = require('../services/redis');
-const { POSTBACK_TITLE, INPUT_TYPE, QUICK_REPLY, REDIS_KEY } = require('../utils/constant');
-const {
-  replaceArrayItemByIndex,
-  getTimestampFromDueDate,
-  getTimestampFromReminder,
-  isCorrectTimeFormat,
-  constructTodoSubtitle,
-  constructTodoReminderKey,
-} = require('../utils/utils');
+const DialogueRouter = require('./Dialogue');
+const { POSTBACK_TITLE, INPUT_TYPE, QUICK_REPLY } = require('../utils/constant');
+const { constructTodoSubtitle } = require('../utils/utils');
 const { editTodoHint } = require('../utils/wording');
-
-const sendWrongFormat = async (context, value, type) => {
-  // TODO: Send different message according to different types
-  console.log(`sendWrongFormat ${type}:${value}`);
-  await context.sendText(`Wrong format: ${value}`);
-};
 
 const listTodos = async context => {
   if (context.state.todos.length === 0) {
@@ -81,65 +68,6 @@ const deleteTodo = async (context, targetTodo) => {
     todos: context.state.todos.filter(({ title }) => title !== targetTodo),
   });
   await context.sendText(`Delete todo ${targetTodo}!`);
-};
-
-const updateTargetTodo = async (context, targetIdx) => {
-  const updatedTodo = context.state.todos[targetIdx];
-  const editRawData = context.event.text;
-  const editRawArray = editRawData.split('\n');
-
-  editRawArray.forEach(async editString => {
-    if (editString[0] === 'T') {
-      const todoTitle = editString.slice(2);
-      if (context.state.todos.findIndex(({ title }) => title === todoTitle) !== -1) {
-        await context.sendText(`Todo ${todoTitle} already exists`);
-      } else {
-        updatedTodo.title = todoTitle;
-      }
-    } else if (editString[0] === 'R') {
-      // Set Reminder
-      let setData = editString.split(' ');
-      if (setData.length !== 3) {
-        await sendWrongFormat(context, editString, INPUT_TYPE.EDIT_TODO_REMINDER);
-      } else {
-        const timeStamp = getTimestampFromReminder(
-          `${editString.split(' ')[1]} ${editString.split(' ')[2]}`,
-          context.state.prefs.timezone
-        );
-        if (!timeStamp) {
-          await sendWrongFormat(context, editString, INPUT_TYPE.EDIT_TODO_REMINDER);
-        } else {
-          updatedTodo.reminder = timeStamp;
-          const user = await context.getUserProfile();
-          redisClient.zadd(
-            REDIS_KEY.TODO_QUEUE,
-            Math.floor(timeStamp.getTime() / 1000),
-            constructTodoReminderKey(user.id, updatedTodo.title)
-          );
-        }
-      }
-    } else if (editString[0] === 'D') {
-      // Set DueDate
-      let setData = editString.split(' ');
-      if (setData.length !== 2) {
-        await sendWrongFormat(context, editString, INPUT_TYPE.EDIT_TODO_DUE_DATE);
-      } else {
-        const timeStamp = getTimestampFromDueDate(
-          editString.split(' ')[1],
-          context.state.prefs.timezone
-        );
-        if (!timeStamp) {
-          await sendWrongFormat(context, editString, INPUT_TYPE.EDIT_TODO_DUE_DATE);
-        } else {
-          updatedTodo.dueDate = timeStamp;
-        }
-      }
-    } else if (editString[0] === 'N') {
-      // Set Note
-      updatedTodo.note = editString.slice(2);
-    }
-  });
-  return updatedTodo;
 };
 
 const listSettings = async context => {
@@ -205,64 +133,6 @@ const sendQuickReplyAfterAddingTodo = async (context, todoTitle) => {
   );
 };
 
-const handleInputEditTodo = async (context, targetTodoTitle, targetIdx) => {
-  if (targetIdx !== -1) {
-    if (context.event.text === 'cancel') {
-      await context.sendText(`Cancel update ${targetTodoTitle}`);
-    } else {
-      const editTodo = await updateTargetTodo(context, targetIdx);
-      const { reminder, dueDate, note } = editTodo;
-      await context.sendText(
-        `Update ${targetTodoTitle}\n${constructTodoSubtitle(
-          { reminder, dueDate, note },
-          context.state.prefs.timezone
-        )}`
-      );
-      context.setState({
-        todos: replaceArrayItemByIndex(context.state.todos, targetIdx, editTodo),
-      });
-    }
-  } else {
-    await context.sendText(`Update ${targetTodoTitle} failed. Please try again later`);
-  }
-};
-
-const handleInputAddTodo = async (context, todoTitle) => {
-  if (context.state.todos.findIndex(({ title }) => title === todoTitle) !== -1) {
-    await context.sendText(`Todo ${todoTitle} already exists`);
-  } else {
-    context.setState({
-      todos: context.state.todos.concat({ title: todoTitle }),
-    });
-    await context.sendText(
-      `Add todo: ${todoTitle}..\n\nTo add a todo faster, you can simply enter "/a something todo".\nFor example:\n/a ${todoTitle}`
-    );
-    await sendQuickReplyAfterAddingTodo(context, todoTitle);
-  }
-};
-
-const handleInputSetDailyReminder = async (context, dailyReminder) => {
-  if (isCorrectTimeFormat(dailyReminder)) {
-    context.setState({
-      prefs: { ...context.state.prefs, dailyReminder },
-    });
-    await context.sendText(`Set daily reminder: ${dailyReminder}`);
-  } else {
-    await sendWrongFormat(context, dailyReminder, INPUT_TYPE.SET_DAILY_REMINDER);
-  }
-};
-
-const handleInputSetTimezone = async (context, timezone) => {
-  if (-12 <= timezone <= 14) {
-    context.setState({
-      prefs: { ...context.state.prefs, timezone },
-    });
-    await context.sendText(`Set your timezone: ${timezone}`);
-  } else {
-    await sendWrongFormat(context, timezone, INPUT_TYPE.SET_TIME_ZONE);
-  }
-};
-
 const handleQuickReplyAddTodo = async (context, todoTitle) => {
   if (context.state.todos.findIndex(({ title }) => title === todoTitle) !== -1) {
     context.setState({
@@ -295,34 +165,6 @@ const handleQuickReplyViewTodo = async (context, todoTitle) => {
       context.state.prefs.timezone
     )}`
   );
-};
-
-const HandleUserInputInDialogue = async context => {
-  /**  User input after instruction */
-  switch (context.state.userInput.type) {
-    case INPUT_TYPE.EDIT_TODO:
-      const targetTodoTitle = context.state.userInput.payload;
-      const targetIdx = context.state.todos.findIndex(({ title }) => title === targetTodoTitle);
-      await handleInputEditTodo(context, targetTodoTitle, targetIdx);
-      break;
-    case INPUT_TYPE.ADD_TODO:
-      const todoTitle = context.event.text;
-      await handleInputAddTodo(context, todoTitle);
-      break;
-    case INPUT_TYPE.SET_DAILY_REMINDER:
-      const dailyReminder = context.event.text;
-      await handleInputSetDailyReminder(context, dailyReminder);
-      break;
-    case INPUT_TYPE.SET_TIME_ZONE:
-      const timezone = context.event.text;
-      await handleInputSetTimezone(context, +timezone);
-      break;
-  }
-  context.setState({
-    isWaitingUserInput: false,
-    userInput: null,
-  });
-  return;
 };
 
 const HandleButtonAction = async context => {
@@ -419,7 +261,7 @@ const HandleQuickReply = async context => {
 module.exports = async function App(context) {
   return router([
     payload('GET_STARTED', GetStarted),
-    route(context => context.state.isWaitingUserInput, HandleUserInputInDialogue),
+    route(context => context.state.isWaitingUserInput, DialogueRouter),
     route(context => context.event.isPostback, HandleButtonAction),
     route(context => context.event.isQuickReply, HandleQuickReply),
     route(context => context.event.isText, TextRouter),
