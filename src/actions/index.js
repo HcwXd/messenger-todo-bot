@@ -1,8 +1,8 @@
 /* eslint-disable no-case-declarations */
 const { router, text, payload, route } = require('bottender/router');
 const GetStarted = require('./GetStarted');
-const SendHelp = require('./SendHelp');
 const Nothing = require('./Nothing');
+const TextRouter = require('./text');
 const { redisClient } = require('../services/redis');
 const { POSTBACK_TITLE, INPUT_TYPE, QUICK_REPLY, REDIS_KEY } = require('../utils/constant');
 const {
@@ -11,10 +11,9 @@ const {
   getTimestampFromReminder,
   isCorrectTimeFormat,
   constructTodoSubtitle,
-  constructShortCutTodoList,
   constructTodoReminderKey,
 } = require('../utils/utils');
-const { editTodoHint, advanceEditTodoHint } = require('../utils/wording');
+const { editTodoHint } = require('../utils/wording');
 
 const sendWrongFormat = async (context, value, type) => {
   // TODO: Send different message according to different types
@@ -206,89 +205,6 @@ const sendQuickReplyAfterAddingTodo = async (context, todoTitle) => {
   );
 };
 
-const handleInputExistTodo = async context => {
-  await context.sendText(`Todo "${context.event.text}" exists, you want to:`, {
-    quick_replies: [
-      {
-        content_type: 'text',
-        title: `View todo`,
-        payload: `${QUICK_REPLY.VIEW_TODO}/${context.event.text}`,
-      },
-      {
-        content_type: 'text',
-        title: `Edit todo`,
-        payload: `${QUICK_REPLY.EDIT_TODO}/${context.event.text}`,
-      },
-      {
-        content_type: 'text',
-        title: `Delete todo`,
-        payload: `${QUICK_REPLY.DELETE_TODO}/${context.event.text}`,
-      },
-      {
-        content_type: 'text',
-        title: `Nothing`,
-        payload: QUICK_REPLY.NOTHING,
-      },
-    ],
-  });
-};
-
-const handleInputNewTodo = async context => {
-  await context.sendText('Pick an action', {
-    quick_replies: [
-      {
-        content_type: 'text',
-        title: `Add as todo`,
-        payload: `${QUICK_REPLY.ADD_TODO}/${context.event.text}`,
-      },
-      {
-        content_type: 'text',
-        title: `Nothing`,
-        payload: QUICK_REPLY.NOTHING,
-      },
-    ],
-  });
-};
-
-const handleShortCutAddTodo = async (context, todoTitle) => {
-  if (context.state.todos.findIndex(({ title }) => title === todoTitle) !== -1) {
-    context.setState({
-      isWaitingUserInput: false,
-      userInput: null,
-    });
-    await context.sendText(`Todo ${todoTitle} already exists`);
-  } else if (context.state.todos.length >= 10) {
-    await context.sendText(`Sorry. You can only have 10 todos in your list.`);
-  } else {
-    context.setState({
-      todos: context.state.todos.concat({ title: todoTitle }),
-    });
-    await context.sendText(`Add todo: ${todoTitle}.`);
-    await sendQuickReplyAfterAddingTodo(context, todoTitle);
-  }
-};
-
-const handleShortCutListTodo = async context => {
-  if (context.state.todos.length === 0) {
-    await context.sendText(`There's no todo in your list :-p`);
-    return;
-  }
-  context.sendText(
-    `Your Todo:\n${constructShortCutTodoList(
-      context.state.todos
-    )}\n\nChoose the index of the todo you want to view or edit:`,
-    {
-      quick_replies: context.state.todos.map(({ title }, idx) => {
-        return {
-          content_type: 'text',
-          title: `${idx + 1}`,
-          payload: `${QUICK_REPLY.CHOOSE_TODO}/${title}`,
-        };
-      }),
-    }
-  );
-};
-
 const handleInputEditTodo = async (context, targetTodoTitle, targetIdx) => {
   if (targetIdx !== -1) {
     if (context.event.text === 'cancel') {
@@ -381,7 +297,7 @@ const handleQuickReplyViewTodo = async (context, todoTitle) => {
   );
 };
 
-const HandleUserInputAfterInstruction = async context => {
+const HandleUserInputInDialogue = async context => {
   /**  User input after instruction */
   switch (context.state.userInput.type) {
     case INPUT_TYPE.EDIT_TODO:
@@ -500,44 +416,13 @@ const HandleQuickReply = async context => {
   ]);
 };
 
-const HandleUserInputInitiatedByUser = async context => {
-  /**  Userinput initiated by user && Shortcut text */
-  return router([
-    text(/^(list|l)$/i, async () => {
-      await handleShortCutListTodo(context);
-    }),
-    text(/^(help|h)$/i, SendHelp),
-    text(/^(help edit)$/i, async () => {
-      await context.sendText(advanceEditTodoHint);
-    }),
-    text(/^(settings|s)$/i, async () => {
-      await listSettings(context);
-    }),
-    text(/^\/a/, async () => {
-      const todoTitle = context.event.text.slice(3);
-      await handleShortCutAddTodo(context, todoTitle);
-    }),
-    text('*', async () => {
-      const targetIdx = context.state.todos.findIndex(({ title }) => title === context.event.text);
-      if (targetIdx !== -1) {
-        await handleInputExistTodo(context);
-      } else {
-        await handleInputNewTodo(context);
-      }
-    }),
-  ]);
-};
-
 module.exports = async function App(context) {
   return router([
     payload('GET_STARTED', GetStarted),
-    route(
-      context => context.state.isWaitingUserInput && context.event.isText,
-      HandleUserInputAfterInstruction
-    ),
+    route(context => context.state.isWaitingUserInput, HandleUserInputInDialogue),
     route(context => context.event.isPostback, HandleButtonAction),
     route(context => context.event.isQuickReply, HandleQuickReply),
-    route(context => context.event.isText, HandleUserInputInitiatedByUser),
+    route(context => context.event.isText, TextRouter),
 
     text('*', async () => {
       await context.sendText(`Hello :)`);
