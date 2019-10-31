@@ -4,7 +4,7 @@ const GetStarted = require('./GetStarted');
 const SendHelp = require('./SendHelp');
 const Nothing = require('./Nothing');
 const { redisClient } = require('../services/redis');
-const { POSTBACK_TITLE, INPUT_TYPE, QUICK_REPLY, REDIS_KEY } = require('../constant');
+const { POSTBACK_TITLE, INPUT_TYPE, QUICK_REPLY, REDIS_KEY } = require('../utils/constant');
 const {
   replaceArrayItemByIndex,
   getTimestampFromDueDate,
@@ -13,8 +13,8 @@ const {
   constructTodoSubtitle,
   constructShortCutTodoList,
   constructTodoReminderKey,
-} = require('../utils');
-const { editTodoHint, advanceEditTodoHint } = require('../wording');
+} = require('../utils/utils');
+const { editTodoHint, advanceEditTodoHint } = require('../utils/wording');
 
 const sendWrongFormat = async (context, value, type) => {
   // TODO: Send different message according to different types
