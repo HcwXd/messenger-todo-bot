@@ -1,4 +1,4 @@
-const { helpText } = require('../wording');
+const { helpText } = require('../utils/wording');
 const { sendText, series } = require('bottender-compose');
 
 module.exports = async function GetStarted() {
