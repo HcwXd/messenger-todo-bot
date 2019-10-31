@@ -1,5 +1,5 @@
-const { POSTBACK_TITLE } = require('./src/constant');
-const { helpText } = require('./src/wording');
+const { POSTBACK_TITLE } = require('./src/utils/constant');
+const { helpText } = require('./src/utils/wording');
 
 module.exports = {
   session: {

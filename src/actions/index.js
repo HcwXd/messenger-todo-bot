@@ -529,20 +529,6 @@ const HandleUserInputInitiatedByUser = async context => {
 };
 
 module.exports = async function App(context) {
-  if (!context.state.todos) {
-    context.setState({
-      todos: [],
-      isWaitingUserInput: false,
-      userInput: null,
-      prefs: { dailyReminder: null, timezone: 8 },
-    });
-  }
-  if (!context.state.prefs.timezone) {
-    context.setState({
-      prefs: { ...context.state.prefs, timezone: 8 },
-    });
-  }
-
   return router([
     payload('GET_STARTED', GetStarted),
     route(
