@@ -1,5 +1,5 @@
 /* eslint-disable no-case-declarations */
-const ListTodoDetailed = require('../ListTodoDetailed');
+const ListTodoWithButton = require('../ListTodoWithButton');
 const ListSettings = require('../ListSettings');
 const DeleteTodo = require('../DeleteTodo');
 const { INPUT_TYPE, POSTBACK_TITLE } = require('../../utils/constant');
@@ -56,7 +56,7 @@ module.exports = async function PostbackRouter(context) {
       await DeleteTodo(context, targetTodo);
       break;
     case POSTBACK_TITLE.LIST_TODO:
-      await ListTodoDetailed(context);
+      await ListTodoWithButton(context);
       break;
     case POSTBACK_TITLE.SETTINGS:
       await ListSettings(context);

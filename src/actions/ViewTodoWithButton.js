@@ -1,7 +1,7 @@
 const { constructTodoSubtitle } = require('../utils/utils');
 const { POSTBACK_TITLE } = require('../utils/constant');
 
-module.exports = async function listSingleTodo(context, targetTodo) {
+module.exports = async function ViewTodoWithButton(context, targetTodo) {
   const { title, reminder, dueDate, note } = context.state.todos.find(
     ({ title }) => title === targetTodo
   );

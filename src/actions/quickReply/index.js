@@ -2,7 +2,7 @@
 const { router, payload } = require('bottender/router');
 const AddTodoByQuickReply = require('../AddTodoByQuickReply');
 const ViewTodoByQuickReply = require('../ViewTodoByQuickReply');
-const ListSingleTodo = require('../ListSingleTodo');
+const ViewTodoWithButton = require('../ViewTodoWithButton');
 const DeleteTodo = require('../DeleteTodo');
 const Nothing = require('../Nothing');
 const { INPUT_TYPE, QUICK_REPLY } = require('../../utils/constant');
@@ -35,7 +35,7 @@ module.exports = async function QuickReplyRouter(context) {
     }),
     payload(new RegExp(`^${QUICK_REPLY.CHOOSE_TODO}`), async () => {
       const todoTitle = quickReply.payload.slice(QUICK_REPLY.CHOOSE_TODO.length + 1);
-      await ListSingleTodo(context, todoTitle);
+      await ViewTodoWithButton(context, todoTitle);
     }),
     payload(QUICK_REPLY.NOTHING, Nothing),
   ]);

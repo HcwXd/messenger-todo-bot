@@ -1,7 +1,7 @@
 const { POSTBACK_TITLE } = require('../utils/constant');
 const { constructTodoSubtitle } = require('../utils/utils');
 
-module.exports = async function ListTodoDetailed(context) {
+module.exports = async function ListTodoWithButton(context) {
   if (context.state.todos.length === 0) {
     await context.sendText(`There's no todo in your list :-p`);
     return;

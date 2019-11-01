@@ -1,6 +1,6 @@
 const { QUICK_REPLY } = require('../utils/constant');
 
-module.exports = async function ViewTodo(context) {
+module.exports = async function SendQuickReplyAfterOldTodoInput(context) {
   await context.sendText(`Todo "${context.event.text}" exists, you want to:`, {
     quick_replies: [
       {

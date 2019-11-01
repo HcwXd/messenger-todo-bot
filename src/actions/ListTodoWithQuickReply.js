@@ -1,7 +1,7 @@
 const { constructShortCutTodoList } = require('../utils/utils');
 const { QUICK_REPLY } = require('../utils/constant');
 
-module.exports = async function ListTodo(context) {
+module.exports = async function ListTodoWithQuickReply(context) {
   if (context.state.todos.length === 0) {
     await context.sendText(`There's no todo in your list :-p`);
     return;

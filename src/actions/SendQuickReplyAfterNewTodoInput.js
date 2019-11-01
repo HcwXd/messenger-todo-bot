@@ -1,6 +1,6 @@
 const { QUICK_REPLY } = require('../utils/constant');
 
-module.exports = async function NewTodo(context) {
+module.exports = async function SendQuickReplyAfterNewTodoInput(context) {
   await context.sendText('Pick an action', {
     quick_replies: [
       {
