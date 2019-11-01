@@ -1,12 +1,11 @@
 /* eslint-disable no-case-declarations */
-const { router, text } = require('bottender/router');
 const EditTodo = require('../EditTodo');
 const AddTodoByDialogue = require('../AddTodoByDialogue');
 const SetDailyReminder = require('../SetDailyReminder');
 const SetTimezone = require('../SetTimezone');
 const { INPUT_TYPE } = require('../../utils/constant');
 
-module.exports = async function HandleUserInputInDialogue(context) {
+module.exports = async function DialogueRouter(context) {
   /**  Userinput initiated by user && Shortcut text */
   /**  User input after instruction */
   switch (context.state.userInput.type) {

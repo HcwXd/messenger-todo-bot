@@ -1,5 +1,4 @@
 /* eslint-disable no-case-declarations */
-const { router, payload } = require('bottender/router');
 const ListTodoDetailed = require('../ListTodoDetailed');
 const ListSettings = require('../ListSettings');
 const DeleteTodo = require('../DeleteTodo');

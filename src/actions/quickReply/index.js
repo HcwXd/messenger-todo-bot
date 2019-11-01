@@ -8,7 +8,7 @@ const Nothing = require('../Nothing');
 const { INPUT_TYPE, QUICK_REPLY } = require('../../utils/constant');
 const { editTodoHint } = require('../../utils/wording');
 
-module.exports = async function HandleUserInputInDialogue(context) {
+module.exports = async function QuickReplyRouter(context) {
   /**  Quick Reply */
   const { quickReply } = context.event;
   return router([

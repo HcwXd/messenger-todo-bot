@@ -7,7 +7,7 @@ const ViewTodo = require('../ViewTodo');
 const NewTodo = require('../NewTodo');
 const { advanceEditTodoHint } = require('../../utils/wording');
 
-module.exports = async function HandleUserInput(context) {
+module.exports = async function TextRouter(context) {
   /**  Userinput initiated by user && Shortcut text */
   return router([
     text(/^(list|l)$/i, ListTodo),
