@@ -35,6 +35,7 @@ module.exports = {
   DAY_OF_WEEK: ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'],
   REDIS_KEY: {
     TODO_QUEUE: 'todoQueue',
+    DAILY_QUEUE: 'dailyQueue',
   },
   SERVER_TIMEZONE_OFFSET: new Date().getTimezoneOffset() / 60,
 };

@@ -3,7 +3,7 @@
   "version": "0.1.0",
   "private": true,
   "scripts": {
-    "dev": "bottender dev",
+    "dev": "ENV=development bottender dev",
     "lint": "eslint .",
     "start": "bottender start",
     "test": "jest"

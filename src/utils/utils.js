@@ -121,6 +121,10 @@ const constructTodoReminderKey = (userId, todoTitle) => {
   return JSON.stringify({ id: userId, title: todoTitle });
 };
 
+const constructDailyReminderKey = userId => {
+  return JSON.stringify({ id: userId });
+};
+
 module.exports = {
   replaceArrayItemByIndex,
   getTimestampFromDueDate,
@@ -131,4 +135,5 @@ module.exports = {
   constructTodoSubtitle,
   constructShortCutTodoList,
   constructTodoReminderKey,
+  constructDailyReminderKey,
 };
