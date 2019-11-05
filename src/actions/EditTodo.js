@@ -36,11 +36,10 @@ const updateTargetTodo = async (context, targetIdx) => {
           await sendWrongFormat(context, editString, INPUT_TYPE.EDIT_TODO_REMINDER);
         } else {
           updatedTodo.reminder = timeStamp;
-          const user = await context.getUserProfile();
           redisClient.zadd(
             REDIS_KEY.TODO_QUEUE,
             Math.floor(timeStamp.getTime() / 1000),
-            constructTodoReminderKey(user.id, updatedTodo.title)
+            constructTodoReminderKey(context.user.id, updatedTodo.title)
           );
         }
       }
