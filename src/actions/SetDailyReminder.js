@@ -23,12 +23,10 @@ module.exports = async function SetDailyReminder(context, dailyReminder) {
         .add(minute, 'minutes');
     }
 
-    console.log(timeStamp.valueOf());
-
     redisClient.zadd(
       REDIS_KEY.DAILY_QUEUE,
-      Math.floor(timeStamp.getTime() / 1000),
-      constructDailyReminderKey(context.user)
+      Math.floor(timeStamp.valueOf() / 1000),
+      constructDailyReminderKey(context.user.id)
     );
     await context.sendText(`Set daily reminder: ${dailyReminder}`);
   } else {
