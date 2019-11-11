@@ -18,46 +18,16 @@ const sendReminder = async ({ id, message }) => {
   });
 };
 
-const constuctDailyReminderMessage = todos => {
-  const text = `# Daily Reminder\nYour Todos:\n${todos
-    .map(({ title }) => `- ${title}`)
-    .join('\n')}`;
-  return { text };
-};
-
 const constuctTodoReminderMessage = ({ title }) => {
   const text = `# Reminder\n${title}`;
   return { text };
 };
 
-const findDailyReminder = async (id, { todos, prefs }) => {
-  if (prefs && prefs.dailyReminder) {
-    const [hour, minute] = prefs.dailyReminder.split(':');
-    const nowHour =
-      new Date().getHours() + 8 > 23 ? new Date().getHours() + 8 - 24 : new Date().getHours() + 8;
-    if (+hour === nowHour && +minute === new Date().getMinutes() && todos.length > 0) {
-      const message = constuctDailyReminderMessage(todos);
-      await sendReminder({ id, message });
-    }
-  }
-};
-
-const findTodoReminder = async (id, { todos }) => {
-  todos.forEach(async ({ title, reminder, dueDate }) => {
-    if (
-      reminder &&
-      new Date(reminder).toISOString().slice(0, 16) === new Date().toISOString().slice(0, 16)
-    ) {
-      const message = constuctTodoReminderMessage({ title, dueDate });
-      await sendReminder({ id, message });
-    }
-  });
-};
-
-const findReminder = async ({ user, _state: state }) => {
-  const { id } = user;
-  await findDailyReminder(id, state);
-  await findTodoReminder(id, state);
+const constuctDailyReminderMessage = todos => {
+  const text = `# Daily Reminder\nYour Todos:\n${todos
+    .map(({ title }) => `- ${title}`)
+    .join('\n')}`;
+  return { text };
 };
 
 const sendTodoReminder = async rep => {
@@ -66,31 +36,57 @@ const sendTodoReminder = async rep => {
   await sendReminder({ id, message });
 };
 
+const sendDailyReminder = async rep => {
+  const { id } = JSON.parse(rep);
+  const files = ls('../.session/*');
+  for (let file of files) {
+    const rawdata = fs.readFileSync(`../.session/${file.file}`);
+    const jsonData = JSON.parse(rawdata);
+    const { user, _state: state } = jsonData;
+    if (user.id === id) {
+      const message = constuctDailyReminderMessage(state.todos);
+      await sendReminder({ id, message });
+      break;
+    }
+  }
+};
+
 const redisCheckTodoQueue = () => {
   const nowTimeStamp = Math.floor(new Date().getTime() / 1000);
   redisClient.zrangebyscore(
     REDIS_KEY.TODO_QUEUE,
     0,
     nowTimeStamp + 60 - (nowTimeStamp % 60),
-    'WITHSCORES',
     (err, rep) => {
       if (!rep || rep.length === 0) return;
-      rep.forEach(async todo => {
-        await sendTodoReminder(todo);
-        await redisClient.zrem(REDIS_KEY.TODO_QUEUE, todo);
+      rep.forEach(async key => {
+        await sendTodoReminder(key);
+        await redisClient.zrem(REDIS_KEY.TODO_QUEUE, key);
+      });
+    }
+  );
+};
+
+const redisCheckDailyQueue = () => {
+  const nowTimeStamp = Math.floor(new Date().getTime() / 1000);
+  redisClient.zrangebyscore(
+    REDIS_KEY.DAILY_QUEUE,
+    0,
+    nowTimeStamp + 60 - (nowTimeStamp % 60),
+    (err, rep) => {
+      if (!rep || rep.length === 0) return;
+      rep.forEach(async key => {
+        await sendDailyReminder(key);
+        await redisClient.zrem(REDIS_KEY.DAILY_QUEUE, key);
+        redisClient.zadd(REDIS_KEY.DAILY_QUEUE, nowTimeStamp + 24 * 60 * 60, key);
       });
     }
   );
 };
 
 const checkReminder = async () => {
-  const files = ls('../.session/*');
-  for (let file of files) {
-    let rawdata = fs.readFileSync(`../.session/${file.file}`);
-    let jsonData = JSON.parse(rawdata);
-    await findReminder(jsonData);
-  }
   redisCheckTodoQueue();
+  redisCheckDailyQueue();
 };
 checkReminder();
 setInterval(checkReminder, checkReminderInterval);
