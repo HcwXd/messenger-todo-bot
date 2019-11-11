@@ -2,6 +2,7 @@
 const ListTodoWithButton = require('../ListTodoWithButton');
 const ListSettings = require('../ListSettings');
 const DeleteTodo = require('../DeleteTodo');
+const DeleteDailyReminder = require('../DeleteDailyReminder');
 const { INPUT_TYPE, POSTBACK_TITLE } = require('../../utils/constant');
 const { editTodoHint } = require('../../utils/wording');
 
@@ -46,10 +47,7 @@ module.exports = async function PostbackRouter(context) {
       });
       break;
     case POSTBACK_TITLE.DELETE_DAILY_REMINDER:
-      context.setState({
-        prefs: { ...context.state.prefs, dailyReminder: null },
-      });
-      await context.sendText(`Your daily reminder has been deleted`);
+      await DeleteDailyReminder(context);
       break;
     case POSTBACK_TITLE.DELETE_TODO:
       const targetTodo = context.event.postback.payload;
