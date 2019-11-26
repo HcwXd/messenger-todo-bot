@@ -3,7 +3,7 @@ const { helpText } = require('./src/utils/wording');
 
 module.exports = {
   session: {
-    driver: 'file',
+    driver: 'mongo',
     stores: {
       memory: {
         maxSize: 500,
@@ -18,7 +18,7 @@ module.exports = {
         db: 0,
       },
       mongo: {
-        url: 'mongodb://localhost:27017',
+        url: `mongodb://${process.env.MONGO_HOST}:${process.env.MONGO_PORT}`,
         collectionName: 'sessions',
       },
     },
