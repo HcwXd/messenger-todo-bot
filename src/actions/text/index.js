@@ -1,6 +1,6 @@
 const { router, text } = require('bottender/router');
 const ListTodoWithQuickReply = require('../ListTodoWithQuickReply');
-const listSettings = require('../ListSettings');
+const ListSettings = require('../ListSettings');
 const SendHelp = require('../SendHelp');
 const AddTodoByShortcut = require('../AddTodoByShortcut');
 const SendQuickReplyAfterOldTodoInput = require('../SendQuickReplyAfterOldTodoInput');
@@ -11,7 +11,7 @@ module.exports = async function TextRouter(context) {
   /**  Userinput initiated by user && Shortcut text */
   return router([
     text(/^(list|l)$/i, ListTodoWithQuickReply),
-    text(/^(settings|s)$/i, listSettings),
+    text(/^(settings|s)$/i, ListSettings),
     text(/^\/a/, AddTodoByShortcut),
     text(/^(help|h)$/i, SendHelp),
     text(/^(help edit)$/i, async () => {
