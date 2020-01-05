@@ -1,6 +1,6 @@
 const { router, text } = require('bottender/router');
 const ListTodoWithQuickReply = require('../ListTodoWithQuickReply');
-const listSettings = require('../listSettings');
+const listSettings = require('../ListSettings');
 const SendHelp = require('../SendHelp');
 const AddTodoByShortcut = require('../AddTodoByShortcut');
 const SendQuickReplyAfterOldTodoInput = require('../SendQuickReplyAfterOldTodoInput');
