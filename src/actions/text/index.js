@@ -10,7 +10,7 @@ const { advanceEditTodoHint } = require('../../utils/wording');
 module.exports = async function TextRouter(context) {
   /**  Userinput initiated by user && Shortcut text */
   return router([
-    text(/^(list|l)$/i, ListTodoWithQuickReply),
+    text(/^(list|l|\/l)$/i, ListTodoWithQuickReply),
     text(/^(settings|s)$/i, ListSettings),
     text(/^\/a/, AddTodoByShortcut),
     text(/^(help|h)$/i, SendHelp),
