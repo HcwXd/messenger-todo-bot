@@ -3,7 +3,7 @@ Welcome to Todo bot!
 
 To add a todo, use "/a myTodoTitle"
 
-To view todos, enter "/l"
+To list todos, enter "/l"
 
 To edit or delete a todo, enter "/l" then choose the todo you want to edit or delete
 
