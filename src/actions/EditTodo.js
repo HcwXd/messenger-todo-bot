@@ -1,6 +1,5 @@
 const {
   replaceArrayItemByIndex,
-  getTimestampFromDueDate,
   getTimestampFromReminder,
   constructTodoSubtitle,
   constructTodoReminderKey,
@@ -43,22 +42,6 @@ const updateTargetTodo = async (context, targetIdx) => {
           );
         }
       }
-    } else if (editString[0] === 'D') {
-      // Set DueDate
-      let setData = editString.split(' ');
-      if (setData.length !== 2) {
-        await sendWrongFormat(context, editString, INPUT_TYPE.EDIT_TODO_DUE_DATE);
-      } else {
-        const timeStamp = getTimestampFromDueDate(
-          editString.split(' ')[1],
-          context.state.prefs.timezone
-        );
-        if (!timeStamp) {
-          await sendWrongFormat(context, editString, INPUT_TYPE.EDIT_TODO_DUE_DATE);
-        } else {
-          updatedTodo.dueDate = timeStamp;
-        }
-      }
     } else if (editString[0] === 'N') {
       // Set Note
       updatedTodo.note = editString.slice(2);
@@ -73,10 +56,10 @@ module.exports = async function EditTodo(context, targetTodoTitle, targetIdx) {
       await context.sendText(`Cancel update ${targetTodoTitle}`);
     } else {
       const editTodo = await updateTargetTodo(context, targetIdx);
-      const { reminder, dueDate, note } = editTodo;
+      const { reminder, note } = editTodo;
       await context.sendText(
         `Update ${targetTodoTitle}\n${constructTodoSubtitle(
-          { reminder, dueDate, note },
+          { reminder, note },
           context.state.prefs.timezone
         )}`
       );

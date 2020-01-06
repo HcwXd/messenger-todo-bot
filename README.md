@@ -22,7 +22,6 @@ It works like a personal assistant that you can tell when should it remind you a
     - Edit after viewing a todo
   - 4 properties of a todo:
     - Name
-    - Due date
     - Reminder
     - Notes
 - List Todos

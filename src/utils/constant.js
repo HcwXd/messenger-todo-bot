@@ -13,7 +13,6 @@ module.exports = {
     ADD_TODO: `input/addTodo`,
     EDIT_TODO: `input/editTodo`,
     EDIT_TODO_NOTES: `input/editTodo/notes`,
-    EDIT_TODO_DUE_DATE: `input/editTodo/dueDate`,
     EDIT_TODO_REMINDER: `input/editTodo/reminder`,
     SET_DAILY_REMINDER: `input/setDailyReminder`,
     DELETE_DAILY_REMINDER: `input/deleteDailyReminder`,

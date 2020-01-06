@@ -11,27 +11,6 @@ const replaceArrayItemByIndex = (array, idx, newItem) => {
   return ret;
 };
 
-const getTimestampFromDueDate = (dueDate, timezone) => {
-  let year;
-  let month;
-  let day;
-  if (/(today)|(t)|(tmr)|(r)/i.test(dueDate)) {
-    year = new Date().getFullYear();
-    month = new Date().getMonth() + 1;
-    day = new Date().getDate();
-    if (/(tmr)|(r)/i.test(dueDate)) day += 1;
-  } else if (moment(dueDate, 'YYYY/M/D', true).isValid()) {
-    [year, month, day] = dueDate.split('/');
-  } else if (!isNaN(dueDate)) {
-    year = new Date().getFullYear();
-    month = new Date().getMonth() + 1;
-    day = new Date().getDate() + Number(dueDate);
-  } else {
-    return false;
-  }
-  return new Date(year, month - 1, day, -SERVER_TIMEZONE_OFFSET - timezone);
-};
-
 const getTimestampFromReminder = (reminder, timezone) => {
   if (reminder.split(' ').length !== 2) return false;
   const [date, time] = reminder.split(' ');
@@ -75,17 +54,6 @@ const getTimestampFromReminder = (reminder, timezone) => {
 
   return timeStamp;
 };
-const renderDueDate = (dueDate, timezone) => {
-  const timeStamp = new Date(dueDate);
-  timeStamp.setHours(timeStamp.getHours() + timezone + SERVER_TIMEZONE_OFFSET);
-  const year = timeStamp.getFullYear();
-  const month = paddingLeft(timeStamp.getMonth() + 1);
-  const date = paddingLeft(timeStamp.getDate());
-  const day = paddingLeft(DAY_OF_WEEK[timeStamp.getDay()]);
-  return year === new Date().getFullYear()
-    ? `${month}/${date} (${day})`
-    : `${year}/${month}/${date} (${day})`;
-};
 
 const renderReminder = (reminder, timezone) => {
   const timeStamp = new Date(reminder);
@@ -106,9 +74,8 @@ const isCorrectTimeFormat = timeString => {
   return moment(timeString, 'H:m', true).isValid();
 };
 
-const constructTodoSubtitle = ({ reminder, dueDate, note }, timezone) => {
+const constructTodoSubtitle = ({ reminder, note }, timezone) => {
   let subtitle = '';
-  subtitle += dueDate ? `Due ${renderDueDate(dueDate, timezone)}\n` : `No due date\n`;
   subtitle += reminder ? `Remind me at ${renderReminder(reminder, timezone)}\n` : `No reminder\n`;
   if (note) subtitle += `Note: ${note}`;
   return subtitle;
@@ -127,9 +94,7 @@ const constructDailyReminderKey = userId => {
 
 module.exports = {
   replaceArrayItemByIndex,
-  getTimestampFromDueDate,
   getTimestampFromReminder,
-  renderDueDate,
   renderReminder,
   isCorrectTimeFormat,
   constructTodoSubtitle,

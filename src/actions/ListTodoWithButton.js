@@ -7,10 +7,10 @@ module.exports = async function ListTodoWithButton(context) {
     return;
   }
   await context.sendGenericTemplate(
-    context.state.todos.map(({ title, reminder, dueDate, note }) => {
+    context.state.todos.map(({ title, reminder, note }) => {
       return {
         title: title,
-        subtitle: constructTodoSubtitle({ reminder, dueDate, note }, context.state.prefs.timezone),
+        subtitle: constructTodoSubtitle({ reminder, note }, context.state.prefs.timezone),
         buttons: [
           {
             type: 'postback',

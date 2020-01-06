@@ -2,7 +2,7 @@ const { QUICK_REPLY } = require('../utils/constant');
 
 module.exports = async function SendQuickReplyAfterAddingTodo(context, todoTitle) {
   context.sendText(
-    `You can add due date and reminder of the todo by clicking the edit button.\nOr ignore the button and add those later.`,
+    `You can add reminder and notes of the todo by clicking the edit button.\nOr ignore the button and add those later.`,
     {
       quick_replies: [
         {
