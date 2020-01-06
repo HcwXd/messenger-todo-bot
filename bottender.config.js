@@ -26,6 +26,7 @@ module.exports = {
   initialState: {
     todos: [],
     isWaitingUserInput: false,
+    isInitialSetUp: true,
     userInput: null,
     prefs: { dailyReminder: null, timezone: 8 },
   },

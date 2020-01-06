@@ -39,7 +39,7 @@ module.exports = async function PostbackRouter(context) {
       break;
     case POSTBACK_TITLE.SET_TIME_ZONE:
       await context.sendText(
-        `Enter your timezone offset.\nFor example, if you live in Taiwan, enter "8".\nIf you live in New York, enter "-4".\nYou can find your timezone at https://www.timeanddate.com/time/map/`
+        `Enter your timezone offset.\n\nYou can find your timezone at https://www.timeanddate.com/time/map/\n\nPlease enter a value between -12 ~ 14.`
       );
       context.setState({
         userInput: { type: INPUT_TYPE.SET_TIME_ZONE },

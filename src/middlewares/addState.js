@@ -3,6 +3,7 @@ module.exports = async function addState(context, { next }) {
     context.setState({
       todos: [],
       isWaitingUserInput: false,
+      isInitialSetUp: true,
       userInput: null,
       prefs: { dailyReminder: null, timezone: 8 },
     });
