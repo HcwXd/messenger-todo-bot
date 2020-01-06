@@ -21,7 +21,6 @@
   },
   "dependencies": {
     "bottender": "next",
-    "bottender-compose": "^0.14.0",
     "moment": "^2.24.0",
     "random-item": "^3.0.0",
     "redis": "^2.8.0"

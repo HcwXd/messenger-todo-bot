@@ -39,7 +39,7 @@ module.exports = {
       appSecret: process.env.MESSENGER_APP_SECRET,
       verifyToken: process.env.MESSENGER_VERIFY_TOKEN,
       profile: {
-        get_started: {
+        getStarted: {
           payload: 'GET_STARTED',
         },
         greeting: [
@@ -48,7 +48,7 @@ module.exports = {
             text: helpText,
           },
         ],
-        persistent_menu: [
+        persistentMenu: [
           {
             locale: 'default',
             composer_input_disabled: false,
