@@ -44,6 +44,6 @@ R 0 3
 This sets the reminder to three hours later today.
 
 R 1 0
-This sets the reminder to at the same time tomorrow.
+This sets the reminder to the same time tomorrow.
 `;
 module.exports = { helpText, editTodoHint, advanceEditTodoHint };
