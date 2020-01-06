@@ -1,11 +1,11 @@
 const helpText = `
 Welcome to Todo bot!
 
-To add or view a todo, you can simply enter the name of it
+To add a todo, use "/a myTodoTitle"
 
-To view all todos, enter "list"
+To view todos, enter "/l"
 
-To edit or delete a todo, enter "list" then choose the todo you want to edit or delete
+To edit or delete a todo, enter "/l" then choose the todo you want to edit or delete
 
 By clicking the edit button of a todo, you can add its
 1. Reminder
@@ -30,9 +30,7 @@ T Call Jack and Bob
 R 2019/12/1 13:15
 N Remember to call Jack first
 
-If you only want to edit certain fields, you can enter those in any order.
-For example:
-R 2020/9/13 8:10
+You can enter those in any order.
 
 If you don't want to edit anything, enter "cancel"
 
@@ -40,9 +38,12 @@ To see advanced edit shortcut, enter "help edit" after finishing this edition.
 `;
 
 const advanceEditTodoHint = `
-You can use number to represent the day after that number of days or the hour after that number of hours.
+You can also set time in a relative number format.
 For example:
 R 0 3
-This sets the reminder to three hours later.
+This sets the reminder to three hours later today.
+
+R 1 0
+This sets the reminder to at the same time tomorrow.
 `;
 module.exports = { helpText, editTodoHint, advanceEditTodoHint };
