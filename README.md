@@ -1,12 +1,10 @@
 ## Messenger TODO BOT
 
-This is a Facebook messenger chatbots that can help you manage your todo list. 
+This is a Facebook messenger chatbots that can help you manage your todo list.
 
-Messenger Link: [m.me/113736270029193](http://m.me/113736270029193)
+Messenger Link: [m.me/104448737749304](https://www.facebook.com/messages/t/104448737749304)
 
-It works like a personal assistant that you can tell when should it remind you a todo by sending you a message  as reminder. Also, you can simply set a daily reminder that allows it to send you a message containing all your todos everyday at a time you set.
-
-
+It works like a personal assistant that you can tell when should it remind you a todo by sending you a message as reminder. Also, you can simply set a daily reminder that allows it to send you a message containing all your todos everyday at a time you set.
 
 ### Functionality
 
@@ -33,8 +31,7 @@ It works like a personal assistant that you can tell when should it remind you a
     - View directly by entering the name of it and bot will give you quick_replies options to View it
     - View with listing todos
 - Reminder
-  - You can set reminder of a todo or set a daily reminder that will remind you all your todos at the time you set every day 
-
+  - You can set reminder of a todo or set a daily reminder that will remind you all your todos at the time you set every day
 
 ### Folder Structure
 
@@ -48,16 +45,3 @@ It works like a personal assistant that you can tell when should it remind you a
 ├── wording.js
 └── reminder.js
 ```
-
-
-### Todo
-
-- [x] Make Add Todo faster (shortcut for adding todo)
-- [x] Use quick reply for adding/listing todo to improve UX
-- [x] Use text list with quick reply instead of gallery for listing todo
-- [x] Introduction section
-- [x] Help section
-- [x] Handle Timezone offset
-- [x] More time validation
-- [ ] Send different message according to different types of invalid input
-- [ ] Use webview instead for more complicated flow for todo edition
