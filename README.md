@@ -1,37 +1,16 @@
 ## Messenger TODO BOT
 
-This is a Facebook messenger chatbots that can help you manage your todo list.
+A Minimalist Todo Tool that runs on Facebook messenger. It can help you manage your todo list and remind you of your todos through messaging.
 
-Messenger Link: [m.me/104448737749304](https://www.facebook.com/messages/t/104448737749304)
+You can start managing your todo through the link:
+
+> Messenger Link: [m.me/104448737749304](https://m.me/104448737749304)
 
 It works like a personal assistant that you can tell when should it remind you a todo by sending you a message as reminder. Also, you can simply set a daily reminder that allows it to send you a message containing all your todos everyday at a time you set.
 
-### Functionality
+### Third Party
 
-- Add Todo
-  - 3 ways to add a todo
-    - Add with button on the persistent menu
-    - Add with shortcut `/a someTodo`
-    - Add directly by entering the name of it and bot will give you quick_replies options to add it
-- Edit Todo
-  - 3 ways to edit a todo
-    - Edit right after adding a todo with quick_replies options
-    - Edit after listing todos with button
-    - Edit after viewing a todo
-  - 4 properties of a todo:
-    - Name
-    - Reminder
-    - Notes
-- List Todos
-  - 2 ways to list todos
-    - List with button on the persistent menu
-    - List with shorcut `list`
-- View a Todo
-  - 2 ways to view a todo
-    - View directly by entering the name of it and bot will give you quick_replies options to View it
-    - View with listing todos
-- Reminder
-  - You can set reminder of a todo or set a daily reminder that will remind you all your todos at the time you set every day
+This project uses [Bottender Framework](https://bottender.js.org/) for bot development.
 
 ### Folder Structure
 
